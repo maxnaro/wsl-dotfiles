@@ -58,8 +58,9 @@ if type -q fzf
 end
 
 # Greeting message (fastfetch)
-function fish_greeting
+if status is-interactive
     if type -q fastfetch
         fastfetch
     end
 end
+
