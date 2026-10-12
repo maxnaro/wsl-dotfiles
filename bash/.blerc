@@ -1,39 +1,57 @@
-# ~/.blerc - ble.sh styling configuration
+# ~/.blerc - ble.sh configuration
 
 # -----------------------------------------------------------------------------
-# Clean Aesthetics: No background highlights, colored font & muted suggestions
+# Responsiveness & Performance
+# -----------------------------------------------------------------------------
+# Instant autosuggestions without delay
+bleopt complete_auto_delay=0
+
+# Disable expensive disk/file scanning during inline syntax checks
+bleopt highlight_filename=
+bleopt highlight_variable=
+
+# -----------------------------------------------------------------------------
+# Color Scheme: Use Standard Terminal Palette Colors ONLY (0-15 & standard names)
+# (Changing terminal color scheme in Windows Terminal will directly style ble.sh!)
 # -----------------------------------------------------------------------------
 
-# Autosuggestions: Clean grey text without any background block
-ble-face -s auto_complete 'fg=244,bg=none'
+# Autosuggestions: Standard terminal bright black / dark grey (Color 8)
+ble-face -s auto_complete 'fg=8,bg=none'
 
-# Syntax error: Clean red text with NO background highlight
-ble-face -s syntax_error 'fg=red,bg=none'
-ble-face -s syntax_warning 'fg=yellow,bg=none'
+# Syntax error & warning: Standard terminal red (Color 1) and yellow (Color 3)
+ble-face -s syntax_error 'fg=1,bg=none'
+ble-face -s syntax_warning 'fg=3,bg=none'
 
-# Command font colors (pure text color, zero background blocks)
-ble-face -s command_builtin_dot 'fg=cyan,bg=none'
-ble-face -s command_builtin 'fg=cyan,bg=none'
-ble-face -s command_alias 'fg=cyan,bg=none'
-ble-face -s command_function 'fg=blue,bg=none'
-ble-face -s command_file 'fg=green,bg=none'
-ble-face -s command_keyword 'fg=magenta,bg=none'
+# Commands: Standard terminal cyan (Color 6), blue (Color 4), green (Color 2), magenta (Color 5)
+ble-face -s command_builtin_dot 'fg=6,bg=none'
+ble-face -s command_builtin 'fg=6,bg=none'
+ble-face -s command_alias 'fg=6,bg=none'
+ble-face -s command_function 'fg=4,bg=none'
+ble-face -s command_file 'fg=2,bg=none'
+ble-face -s command_keyword 'fg=5,bg=none'
+ble-face -s command_jobs 'fg=1,bg=none'
 
 # Syntax elements (arguments, quotes, operators)
-ble-face -s argument_option 'fg=246,bg=none'
-ble-face -s syntax_quoted 'fg=yellow,bg=none'
-ble-face -s syntax_expr 'fg=cyan,bg=none'
-ble-face -s syntax_delimiter 'fg=248,bg=none'
-ble-face -s syntax_param_expansion 'fg=magenta,bg=none'
-ble-face -s syntax_history_expansion 'fg=cyan,bg=none'
-ble-face -s syntax_comment 'fg=242,bg=none'
+ble-face -s syntax_default 'none'
+ble-face -s argument_option 'fg=8,bg=none'
+ble-face -s syntax_quoted 'fg=3,bg=none'
+ble-face -s syntax_quotation 'fg=3,bg=none'
+ble-face -s syntax_escape 'fg=5,bg=none'
+ble-face -s syntax_expr 'fg=6,bg=none'
+ble-face -s syntax_delimiter 'none'
+ble-face -s syntax_param_expansion 'fg=5,bg=none'
+ble-face -s syntax_history_expansion 'fg=6,bg=none'
+ble-face -s syntax_comment 'fg=8,bg=none'
+ble-face -s syntax_glob 'fg=5,bg=none'
+ble-face -s syntax_brace 'none'
+ble-face -s syntax_tilde 'none'
 
-# Clean completion menu styling
-ble-face -s menu_complete_match 'fg=cyan,bold,bg=none'
-ble-face -s menu_desc_default 'fg=244,bg=none'
-ble-face -s menu_desc_type 'fg=242,bg=none'
+# Completion menu styling
+ble-face -s menu_complete_match 'fg=6,bold,bg=none'
+ble-face -s menu_desc_default 'fg=8,bg=none'
+ble-face -s menu_desc_type 'fg=8,bg=none'
 
-# Region / selection: subtle muted highlight
-ble-face -s region 'bg=238,fg=none'
-ble-face -s region_match 'bg=240,fg=none'
-ble-face -s region_target 'bg=240,fg=none'
+# Selection / Region
+ble-face -s region 'reverse'
+ble-face -s region_match 'reverse'
+ble-face -s region_target 'reverse'
