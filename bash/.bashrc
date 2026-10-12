@@ -119,14 +119,28 @@ if ! shopt -oq posix; then
   fi
 fi
 
+# NVM CONFIGURATION (Lazy-loaded on first call to nvm/node/npm/npx/pnpm/yarn)
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+_load_nvm() {
+    unset -f nvm node npm npx pnpm yarn _load_nvm
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+}
+for _nvm_cmd in nvm node npm npx pnpm yarn; do
+    eval "$_nvm_cmd() { _load_nvm; \"$_nvm_cmd\" \"\$@\"; }"
+done
+unset _nvm_cmd
 
-# PYENV CONFIGURATION
+# PYENV CONFIGURATION (Fast PATH shims, lazy-load completions/rehash on pyenv invocation)
 export PYENV_ROOT="$HOME/.pyenv"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
+if [ -d "$PYENV_ROOT/bin" ]; then
+    export PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"
+fi
+pyenv() {
+    unset -f pyenv
+    eval "$(command pyenv init -)"
+    pyenv "$@"
+}
 
 # Added by Antigravity CLI installer
 export PATH="/home/max/.local/bin:$PATH"
@@ -136,7 +150,8 @@ _clean_path=$(echo "$PATH" | tr ':' '\n' | grep -v '^/mnt/c' | paste -sd: -)
 export PATH="${_clean_path}:/mnt/c/Users/MaxNarongchai/AppData/Local/Programs/Microsoft VS Code/bin"
 unset _clean_path
 
-export PATH="$(go env GOPATH)/bin:$PATH"
+# Go bin PATH (Static path avoids slow 'go env GOPATH' subshell execution)
+export PATH="${GOPATH:-$HOME/go}/bin:$PATH"
 [[ -f ~/.scripts/auto_venv.sh ]] && source ~/.scripts/auto_venv.sh
 
 # -----------------------------------------------------------------------------
