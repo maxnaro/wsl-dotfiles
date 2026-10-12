@@ -60,7 +60,7 @@ end
 # Greeting message (pokemon-terminal-greeting)
 if status is-interactive
     if type -q pokemon-greeting
-        pokemon-greeting
+        pokemon-greeting --speed 0
     else if type -q fastfetch
         fastfetch
     end
