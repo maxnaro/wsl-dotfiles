@@ -5,7 +5,9 @@ return {
     priority = 1000,
     dependencies = { "rktjmp/lush.nvim" },
     config = function()
-      -- Optional setup overrides can go here
+      require("chocolatier").setup({
+        transparent_mode = true,
+      })
       vim.cmd([[colorscheme chocolatier]])
     end,
   },

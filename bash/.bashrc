@@ -119,24 +119,24 @@ fi
 # NVM CONFIGURATION (Lazy-loaded on first call to nvm/node/npm/npx/pnpm/yarn)
 export NVM_DIR="$HOME/.nvm"
 _load_nvm() {
-    unset -f nvm node npm npx pnpm yarn _load_nvm
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+  unset -f nvm node npm npx pnpm yarn _load_nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 }
 for _nvm_cmd in nvm node npm npx pnpm yarn; do
-    eval "$_nvm_cmd() { _load_nvm; \"$_nvm_cmd\" \"\$@\"; }"
+  eval "$_nvm_cmd() { _load_nvm; \"$_nvm_cmd\" \"\$@\"; }"
 done
 unset _nvm_cmd
 
 # PYENV CONFIGURATION (Fast PATH shims, lazy-load completions/rehash on pyenv invocation)
 export PYENV_ROOT="$HOME/.pyenv"
 if [ -d "$PYENV_ROOT/bin" ]; then
-    export PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"
+  export PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"
 fi
 pyenv() {
-    unset -f pyenv
-    eval "$(command pyenv init -)"
-    pyenv "$@"
+  unset -f pyenv
+  eval "$(command pyenv init -)"
+  pyenv "$@"
 }
 
 # Added by Antigravity CLI installer
@@ -157,20 +157,20 @@ export PATH="${GOPATH:-$HOME/go}/bin:$PATH"
 
 # Man pages formatted with bat
 if command -v bat >/dev/null 2>&1; then
-    export MANROFFOPT="-c"
-    export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+  export MANROFFOPT="-c"
+  export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 fi
 
 # FZF: CachyOS-style layout, floating rounded border, and previews
 # (Using terminal default colors to respect user color scheme)
 if command -v fzf >/dev/null 2>&1; then
-    if command -v fd >/dev/null 2>&1; then
-        export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix --hidden --follow --exclude .git'
-        export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-        export FZF_ALT_C_COMMAND='fd --type d --strip-cwd-prefix --hidden --follow --exclude .git'
-    fi
+  if command -v fd >/dev/null 2>&1; then
+    export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix --hidden --follow --exclude .git'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    export FZF_ALT_C_COMMAND='fd --type d --strip-cwd-prefix --hidden --follow --exclude .git'
+  fi
 
-    export FZF_DEFAULT_OPTS="
+  export FZF_DEFAULT_OPTS="
       --style=full
       --layout=reverse
       --height=60%
@@ -183,28 +183,26 @@ if command -v fzf >/dev/null 2>&1; then
       --marker='✓'
     "
 
-    # Previews: syntax-highlighted files (bat), tree directory view (eza)
-    export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :300 {} 2>/dev/null || cat {}'"
-    export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --color=always --icons=always {} 2>/dev/null || ls -la {}'"
+  # Previews: syntax-highlighted files (bat), tree directory view (eza)
+  export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :300 {} 2>/dev/null || cat {}'"
+  export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --color=always --icons=always {} 2>/dev/null || ls -la {}'"
 
-    # Load FZF bash autocompletion & keybindings
-    [ -f "$HOME/.local/share/fzf/completion.bash" ] && source "$HOME/.local/share/fzf/completion.bash"
-    [ -f "$HOME/.local/share/fzf/key-bindings.bash" ] && source "$HOME/.local/share/fzf/key-bindings.bash"
+  # Load FZF bash autocompletion & keybindings
+  [ -f "$HOME/.local/share/fzf/completion.bash" ] && source "$HOME/.local/share/fzf/completion.bash"
+  [ -f "$HOME/.local/share/fzf/key-bindings.bash" ] && source "$HOME/.local/share/fzf/key-bindings.bash"
 fi
 
 # Minimalist CachyOS Pure-style prompt (two-line layout with git branch and ❯ symbol)
 _cachyos_git_branch() {
-    local branch
-    branch=$(git branch --show-current 2>/dev/null)
-    if [ -n "$branch" ]; then
-        printf " (%s)" "$branch"
-    fi
+  local branch
+  branch=$(git branch --show-current 2>/dev/null)
+  if [ -n "$branch" ]; then
+    printf " (%s)" "$branch"
+  fi
 }
 PS1='\w$(_cachyos_git_branch)\n❯ '
 
 # Automatically launch fish for interactive sessions (retains bash for system scripts)
 if [[ $- == *i* ]] && [ -z "$FISH_VERSION" ] && command -v fish >/dev/null 2>&1; then
-    exec fish
+  exec fish
 fi
-
-
