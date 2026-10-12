@@ -207,4 +207,9 @@ if [[ $- == *i* ]] && command -v fastfetch >/dev/null 2>&1; then
     fastfetch
 fi
 
+# Automatically launch fish for interactive sessions (retains bash for system scripts)
+if [[ $- == *i* ]] && [ -z "$FISH_VERSION" ] && command -v fish >/dev/null 2>&1; then
+    exec fish
+fi
+
 
