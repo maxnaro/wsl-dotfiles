@@ -156,11 +156,16 @@ if [ -f "$DOTFILES_DIR/git/.gitconfig" ]; then
     link_file "$DOTFILES_DIR/git/.gitconfig" "$HOME/.gitconfig"
 fi
 
+# Link helper scripts (.scripts/)
+if [ -f "$DOTFILES_DIR/scripts/.scripts/auto_venv.sh" ]; then
+    link_file "$DOTFILES_DIR/scripts/.scripts/auto_venv.sh" "$HOME/.scripts/auto_venv.sh"
+fi
+
 # -----------------------------------------------------------------------------
 # 3. Optional: GNU Stow support
 # -----------------------------------------------------------------------------
 if command -v stow >/dev/null 2>&1; then
-    info "GNU Stow detected. You can also run 'stow bash' or 'stow git' inside $DOTFILES_DIR"
+    info "GNU Stow detected. You can also run 'stow bash', 'stow git', or 'stow scripts' inside $DOTFILES_DIR"
 fi
 
 echo ""

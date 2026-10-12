@@ -11,6 +11,9 @@ dotfiles/
 │   └── .bash_aliases
 ├── git/
 │   └── .gitconfig
+├── scripts/
+│   └── .scripts/
+│       └── auto_venv.sh
 ├── setup.sh
 └── README.md
 ```
@@ -33,6 +36,7 @@ source ~/.bashrc
    - `bash/.bashrc` -> `~/.bashrc`
    - `bash/.bash_aliases` -> `~/.bash_aliases`
    - `git/.gitconfig` -> `~/.gitconfig`
+   - `scripts/.scripts/auto_venv.sh` -> `~/.scripts/auto_venv.sh`
 4. Creates automatic `.bak` backups if any files already exist in your home directory before linking.
 
 ### (Optional) GNU Stow
@@ -42,4 +46,5 @@ If you prefer using `stow`:
 cd ~/dotfiles
 stow -R bash
 stow -R git
+stow -R scripts
 ```
