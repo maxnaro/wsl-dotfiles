@@ -41,7 +41,7 @@ source ~/.bashrc
 ```
 
 ### What `setup.sh` does:
-1. **Downloads modern CLI tools & Neovim & Fish** (`fzf`, `bat`, `eza`, `fastfetch`, `nvim`, `fish`) directly to `~/.local/bin`.
+1. **Downloads modern CLI tools, Neovim, Fish & Pokémon Greeting** (`fzf`, `bat`, `eza`, `fastfetch`, `nvim`, `fish`, `pokemon-greeting`) directly to `~/.local/bin`.
 2. **Downloads official FZF bash keybindings and completions** to `~/.local/share/fzf/`.
 3. **Symlinks dotfiles** cleanly to `$HOME`:
    - `bash/.bashrc` -> `~/.bashrc`

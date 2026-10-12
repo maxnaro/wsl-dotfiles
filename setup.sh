@@ -149,6 +149,18 @@ else
     success "Fish Shell is already available"
 fi
 
+# 1.8 POKEMON TERMINAL GREETING
+if ! command -v "$BIN_DIR/pokemon-greeting" >/dev/null 2>&1; then
+    info "Installing pokemon-terminal-greeting..."
+    TMP_PKG=$(mktemp -d)
+    git clone --depth 1 https://github.com/Youpen-y/pokemon-terminal-greeting.git "$TMP_PKG"
+    "$TMP_PKG/install.sh" --no-hook
+    rm -rf "$TMP_PKG"
+    success "pokemon-terminal-greeting installed"
+else
+    success "pokemon-terminal-greeting is already installed"
+fi
+
 # -----------------------------------------------------------------------------
 # 2. Symlink Dotfiles
 # -----------------------------------------------------------------------------

@@ -57,9 +57,11 @@ if type -q fzf
     set -gx FZF_ALT_C_OPTS "--preview 'eza --tree --level=2 --color=always --icons=always {} 2>/dev/null || ls -la {}'"
 end
 
-# Greeting message (fastfetch)
+# Greeting message (pokemon-terminal-greeting)
 if status is-interactive
-    if type -q fastfetch
+    if type -q pokemon-greeting
+        pokemon-greeting
+    else if type -q fastfetch
         fastfetch
     end
 end
