@@ -163,6 +163,9 @@ link_file() {
 # Link bash configuration
 link_file "$DOTFILES_DIR/bash/.bashrc" "$HOME/.bashrc"
 link_file "$DOTFILES_DIR/bash/.bash_aliases" "$HOME/.bash_aliases"
+if [ -f "$DOTFILES_DIR/bash/.inputrc" ]; then
+    link_file "$DOTFILES_DIR/bash/.inputrc" "$HOME/.inputrc"
+fi
 
 # Link git configuration if present
 if [ -f "$DOTFILES_DIR/git/.gitconfig" ]; then

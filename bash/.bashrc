@@ -127,9 +127,14 @@ eval "$(pyenv init -)"
 
 # Added by Antigravity CLI installer
 export PATH="/home/max/.local/bin:$PATH"
-[[ -f ~/.scripts/auto_venv.sh ]] && source ~/.scripts/auto_venv.sh
+# Filter slow /mnt/c Windows paths from PATH to prevent tab-completion freezes in WSL,
+# while retaining access to VS Code CLI
+_clean_path=$(echo "$PATH" | tr ':' '\n' | grep -v '^/mnt/c' | paste -sd: -)
+export PATH="${_clean_path}:/mnt/c/Users/MaxNarongchai/AppData/Local/Programs/Microsoft VS Code/bin"
+unset _clean_path
 
 export PATH="$(go env GOPATH)/bin:$PATH"
+[[ -f ~/.scripts/auto_venv.sh ]] && source ~/.scripts/auto_venv.sh
 
 # -----------------------------------------------------------------------------
 # CachyOS Terminal Enhancements (FZF, Manpager, Prompt, Fastfetch)

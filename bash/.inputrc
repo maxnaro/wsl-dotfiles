@@ -1,0 +1,27 @@
+# ~/.inputrc - Readline aesthetics and UX enhancements
+
+# Colorize completion prefix to match the matched substring
+set colored-completion-prefix on
+
+# Colorize file names in completion listings (uses LS_COLORS / terminal palette)
+set colored-stats on
+
+# Case-insensitive tab completion (typing 'doc' matches 'Documents/')
+set completion-ignore-case on
+
+# Treat hyphens and underscores as equivalent ('foo-bar' matches 'foo_bar')
+set completion-map-case on
+
+# Show completions immediately on single tab if ambiguous, instead of ringing bell
+set show-all-if-ambiguous on
+
+# Append indicator characters to file types (@ for symlinks, / for dirs, * for executables)
+set visible-stats on
+
+# Cycle through completions with Tab (press Tab repeatedly to cycle through options)
+"\t": menu-complete
+"\e[Z": menu-complete-backward
+
+# Up/Down arrows search command history matching whatever you've typed so far!
+"\e[A": history-search-backward
+"\e[B": history-search-forward
