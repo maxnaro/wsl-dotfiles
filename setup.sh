@@ -136,6 +136,16 @@ else
     success "Neovim is already available"
 fi
 
+# 1.7 BLE.SH (Fish-style autosuggestions & syntax highlighting for Bash)
+if [ ! -f "$SHARE_DIR/blesh/ble.sh" ]; then
+    info "Installing ble.sh (autosuggestions)..."
+    mkdir -p "$SHARE_DIR/blesh"
+    curl -sL https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz | tar -xJ --strip-components=1 -C "$SHARE_DIR/blesh"
+    success "ble.sh installed"
+else
+    success "ble.sh is already installed"
+fi
+
 # -----------------------------------------------------------------------------
 # 2. Symlink Dotfiles
 # -----------------------------------------------------------------------------

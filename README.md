@@ -34,14 +34,16 @@ source ~/.bashrc
 
 ### What `setup.sh` does:
 1. **Downloads modern CLI tools & Neovim** (`fzf`, `bat`, `eza`, `fastfetch`, `nvim`) directly to `~/.local/bin`.
-2. **Downloads official FZF bash keybindings and completions** to `~/.local/share/fzf/`.
-3. **Symlinks dotfiles** cleanly to `$HOME`:
+2. **Installs `ble.sh`** to provide real-time syntax highlighting and fish-style autosuggestions as you type.
+3. **Downloads official FZF bash keybindings and completions** to `~/.local/share/fzf/`.
+4. **Symlinks dotfiles** cleanly to `$HOME`:
    - `bash/.bashrc` -> `~/.bashrc`
    - `bash/.bash_aliases` -> `~/.bash_aliases`
+   - `bash/.inputrc` -> `~/.inputrc`
    - `git/.gitconfig` -> `~/.gitconfig`
    - `scripts/.scripts/auto_venv.sh` -> `~/.scripts/auto_venv.sh`
    - `nvim/.config/nvim` -> `~/.config/nvim`
-4. Creates automatic `.bak` backups if any files already exist in your home directory before linking.
+5. Creates automatic `.bak` backups if any files already exist in your home directory before linking.
 
 ### (Optional) GNU Stow
 
