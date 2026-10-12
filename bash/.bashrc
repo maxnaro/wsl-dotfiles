@@ -8,9 +8,6 @@ case $- in
 *) return ;;
 esac
 
-# Load ble.sh (Bash Line Editor) for Fish-style autosuggestions & syntax highlighting
-[[ $- == *i* ]] && [ -f "$HOME/.local/share/blesh/ble.sh" ] && source "$HOME/.local/share/blesh/ble.sh" --noattach
-
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
 HISTCONTROL=ignoreboth
@@ -209,8 +206,5 @@ PS1='\w$(_cachyos_git_branch)\n❯ '
 if [[ $- == *i* ]] && command -v fastfetch >/dev/null 2>&1; then
     fastfetch
 fi
-
-# Attach ble.sh at the end of .bashrc
-[[ ${BLE_VERSION-} ]] && ble-attach
 
 

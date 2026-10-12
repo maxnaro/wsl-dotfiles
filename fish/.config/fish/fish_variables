@@ -1,0 +1,3 @@
+# This file contains fish universal variable definitions.
+# VERSION: 3.0
+SETUVAR fish_user_paths:/home/max/\x2epyenv/shims\x1e/home/max/\x2epyenv/bin\x1e/home/max/go/bin\x1e/home/max/\x2elocal/bin

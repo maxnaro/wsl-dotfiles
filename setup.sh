@@ -44,6 +44,7 @@ case "$ARCH" in
         ARCH_EZA="x86_64-unknown-linux-musl"
         ARCH_FASTFETCH="linux-amd64"
         ARCH_NVIM="linux-x86_64"
+        ARCH_FISH="linux-x86_64"
         ;;
     aarch64|arm64)
         ARCH_FZF="linux_arm64"
@@ -51,6 +52,7 @@ case "$ARCH" in
         ARCH_EZA="aarch64-unknown-linux-musl"
         ARCH_FASTFETCH="linux-aarch64"
         ARCH_NVIM="linux-arm64"
+        ARCH_FISH="linux-aarch64"
         ;;
     *)
         error "Unsupported architecture: $ARCH"
@@ -136,14 +138,15 @@ else
     success "Neovim is already available"
 fi
 
-# 1.7 BLE.SH (Fish-style autosuggestions & syntax highlighting for Bash)
-if [ ! -f "$SHARE_DIR/blesh/ble.sh" ]; then
-    info "Installing ble.sh (autosuggestions)..."
-    mkdir -p "$SHARE_DIR/blesh"
-    curl -sL https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz | tar -xJ --strip-components=1 -C "$SHARE_DIR/blesh"
-    success "ble.sh installed"
+# 1.7 FISH SHELL
+if ! command -v "$BIN_DIR/fish" >/dev/null 2>&1 && ! command -v fish >/dev/null 2>&1; then
+    info "Installing Fish Shell..."
+    FISH_VERSION=$(curl -sI https://github.com/fish-shell/fish-shell/releases/latest | grep -i location | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo "4.9.3")
+    curl -sL "https://github.com/fish-shell/fish-shell/releases/download/${FISH_VERSION}/fish-${FISH_VERSION}-${ARCH_FISH}.tar.xz" | tar -xJ -C "$BIN_DIR"
+    chmod +x "$BIN_DIR/fish"
+    success "Fish Shell v${FISH_VERSION} installed"
 else
-    success "ble.sh is already installed"
+    success "Fish Shell is already available"
 fi
 
 # -----------------------------------------------------------------------------
@@ -195,11 +198,16 @@ if [ -d "$DOTFILES_DIR/nvim/.config/nvim" ]; then
     link_file "$DOTFILES_DIR/nvim/.config/nvim" "$HOME/.config/nvim"
 fi
 
+# Link Fish configuration (~/.config/fish)
+if [ -d "$DOTFILES_DIR/fish/.config/fish" ]; then
+    link_file "$DOTFILES_DIR/fish/.config/fish" "$HOME/.config/fish"
+fi
+
 # -----------------------------------------------------------------------------
 # 3. Optional: GNU Stow support
 # -----------------------------------------------------------------------------
 if command -v stow >/dev/null 2>&1; then
-    info "GNU Stow detected. You can also run 'stow bash', 'stow git', 'stow scripts', or 'stow nvim' inside $DOTFILES_DIR"
+    info "GNU Stow detected. You can also run 'stow bash', 'stow git', 'stow scripts', 'stow nvim', or 'stow fish' inside $DOTFILES_DIR"
 fi
 
 echo ""
