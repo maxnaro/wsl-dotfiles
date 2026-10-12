@@ -176,6 +176,9 @@ link_file "$DOTFILES_DIR/bash/.bash_aliases" "$HOME/.bash_aliases"
 if [ -f "$DOTFILES_DIR/bash/.inputrc" ]; then
     link_file "$DOTFILES_DIR/bash/.inputrc" "$HOME/.inputrc"
 fi
+if [ -f "$DOTFILES_DIR/bash/.blerc" ]; then
+    link_file "$DOTFILES_DIR/bash/.blerc" "$HOME/.blerc"
+fi
 
 # Link git configuration if present
 if [ -f "$DOTFILES_DIR/git/.gitconfig" ]; then

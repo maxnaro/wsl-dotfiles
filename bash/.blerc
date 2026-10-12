@@ -1,0 +1,39 @@
+# ~/.blerc - ble.sh styling configuration
+
+# -----------------------------------------------------------------------------
+# Clean Aesthetics: No background highlights, colored font & muted suggestions
+# -----------------------------------------------------------------------------
+
+# Autosuggestions: Clean grey text without any background block
+ble-face -s auto_complete 'fg=244,bg=none'
+
+# Syntax error: Clean red text with NO background highlight
+ble-face -s syntax_error 'fg=red,bg=none'
+ble-face -s syntax_warning 'fg=yellow,bg=none'
+
+# Command font colors (pure text color, zero background blocks)
+ble-face -s command_builtin_dot 'fg=cyan,bg=none'
+ble-face -s command_builtin 'fg=cyan,bg=none'
+ble-face -s command_alias 'fg=cyan,bg=none'
+ble-face -s command_function 'fg=blue,bg=none'
+ble-face -s command_file 'fg=green,bg=none'
+ble-face -s command_keyword 'fg=magenta,bg=none'
+
+# Syntax elements (arguments, quotes, operators)
+ble-face -s argument_option 'fg=246,bg=none'
+ble-face -s syntax_quoted 'fg=yellow,bg=none'
+ble-face -s syntax_expr 'fg=cyan,bg=none'
+ble-face -s syntax_delimiter 'fg=248,bg=none'
+ble-face -s syntax_param_expansion 'fg=magenta,bg=none'
+ble-face -s syntax_history_expansion 'fg=cyan,bg=none'
+ble-face -s syntax_comment 'fg=242,bg=none'
+
+# Clean completion menu styling
+ble-face -s menu_complete_match 'fg=cyan,bold,bg=none'
+ble-face -s menu_desc_default 'fg=244,bg=none'
+ble-face -s menu_desc_type 'fg=242,bg=none'
+
+# Region / selection: subtle muted highlight
+ble-face -s region 'bg=238,fg=none'
+ble-face -s region_match 'bg=240,fg=none'
+ble-face -s region_target 'bg=240,fg=none'
