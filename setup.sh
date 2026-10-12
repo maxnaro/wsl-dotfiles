@@ -43,12 +43,14 @@ case "$ARCH" in
         ARCH_BAT="x86_64-unknown-linux-musl"
         ARCH_EZA="x86_64-unknown-linux-musl"
         ARCH_FASTFETCH="linux-amd64"
+        ARCH_NVIM="linux-x86_64"
         ;;
     aarch64|arm64)
         ARCH_FZF="linux_arm64"
         ARCH_BAT="aarch64-unknown-linux-musl"
         ARCH_EZA="aarch64-unknown-linux-musl"
         ARCH_FASTFETCH="linux-aarch64"
+        ARCH_NVIM="linux-arm64"
         ;;
     *)
         error "Unsupported architecture: $ARCH"
@@ -123,6 +125,17 @@ else
     success "fd is available"
 fi
 
+# 1.6 NEOVIM
+if ! command -v "$BIN_DIR/nvim" >/dev/null 2>&1 && ! command -v nvim >/dev/null 2>&1; then
+    info "Installing Neovim..."
+    NVIM_VERSION=$(curl -sI https://github.com/neovim/neovim/releases/latest | grep -i location | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo "0.12.6")
+    curl -sL "https://github.com/neovim/neovim/releases/download/v${NVIM_VERSION}/nvim-${ARCH_NVIM}.tar.gz" | tar -xz --strip-components=1 -C "$HOME/.local"
+    chmod +x "$BIN_DIR/nvim"
+    success "Neovim v${NVIM_VERSION} installed"
+else
+    success "Neovim is already available"
+fi
+
 # -----------------------------------------------------------------------------
 # 2. Symlink Dotfiles
 # -----------------------------------------------------------------------------
@@ -161,11 +174,16 @@ if [ -f "$DOTFILES_DIR/scripts/.scripts/auto_venv.sh" ]; then
     link_file "$DOTFILES_DIR/scripts/.scripts/auto_venv.sh" "$HOME/.scripts/auto_venv.sh"
 fi
 
+# Link Neovim configuration (~/.config/nvim)
+if [ -d "$DOTFILES_DIR/nvim/.config/nvim" ]; then
+    link_file "$DOTFILES_DIR/nvim/.config/nvim" "$HOME/.config/nvim"
+fi
+
 # -----------------------------------------------------------------------------
 # 3. Optional: GNU Stow support
 # -----------------------------------------------------------------------------
 if command -v stow >/dev/null 2>&1; then
-    info "GNU Stow detected. You can also run 'stow bash', 'stow git', or 'stow scripts' inside $DOTFILES_DIR"
+    info "GNU Stow detected. You can also run 'stow bash', 'stow git', 'stow scripts', or 'stow nvim' inside $DOTFILES_DIR"
 fi
 
 echo ""

@@ -11,6 +11,9 @@ dotfiles/
 │   └── .bash_aliases
 ├── git/
 │   └── .gitconfig
+├── nvim/
+│   └── .config/
+│       └── nvim/
 ├── scripts/
 │   └── .scripts/
 │       └── auto_venv.sh
@@ -30,13 +33,14 @@ source ~/.bashrc
 ```
 
 ### What `setup.sh` does:
-1. **Downloads modern CLI tools** (`fzf`, `bat`, `eza`, `fastfetch`) directly to `~/.local/bin`.
+1. **Downloads modern CLI tools & Neovim** (`fzf`, `bat`, `eza`, `fastfetch`, `nvim`) directly to `~/.local/bin`.
 2. **Downloads official FZF bash keybindings and completions** to `~/.local/share/fzf/`.
 3. **Symlinks dotfiles** cleanly to `$HOME`:
    - `bash/.bashrc` -> `~/.bashrc`
    - `bash/.bash_aliases` -> `~/.bash_aliases`
    - `git/.gitconfig` -> `~/.gitconfig`
    - `scripts/.scripts/auto_venv.sh` -> `~/.scripts/auto_venv.sh`
+   - `nvim/.config/nvim` -> `~/.config/nvim`
 4. Creates automatic `.bak` backups if any files already exist in your home directory before linking.
 
 ### (Optional) GNU Stow
@@ -47,4 +51,5 @@ cd ~/dotfiles
 stow -R bash
 stow -R git
 stow -R scripts
+stow -R nvim
 ```
