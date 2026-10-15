@@ -47,6 +47,7 @@ case "$ARCH" in
         ARCH_FISH="linux-x86_64"
         ARCH_LAZYGIT="Linux_x86_64"
         ARCH_RG="x86_64-unknown-linux-musl"
+        ARCH_ZOXIDE="x86_64-unknown-linux-musl"
         ;;
     aarch64|arm64)
         ARCH_FZF="linux_arm64"
@@ -57,6 +58,7 @@ case "$ARCH" in
         ARCH_FISH="linux-aarch64"
         ARCH_LAZYGIT="Linux_arm64"
         ARCH_RG="aarch64-unknown-linux-musl"
+        ARCH_ZOXIDE="aarch64-unknown-linux-musl"
         ;;
     *)
         error "Unsupported architecture: $ARCH"
@@ -185,6 +187,17 @@ if ! command -v "$BIN_DIR/rg" >/dev/null 2>&1; then
     success "ripgrep v${RG_VERSION} installed"
 else
     success "ripgrep is already installed"
+fi
+
+# 1.11 ZOXIDE
+if ! command -v "$BIN_DIR/zoxide" >/dev/null 2>&1; then
+    info "Installing zoxide..."
+    ZOXIDE_VERSION=$(curl -sI https://github.com/ajeetdsouza/zoxide/releases/latest | grep -i location | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo "0.10.0")
+    curl -sL "https://github.com/ajeetdsouza/zoxide/releases/download/v${ZOXIDE_VERSION}/zoxide-${ZOXIDE_VERSION}-${ARCH_ZOXIDE}.tar.gz" | tar -xz -C "$BIN_DIR" zoxide
+    chmod +x "$BIN_DIR/zoxide"
+    success "zoxide v${ZOXIDE_VERSION} installed"
+else
+    success "zoxide is already installed"
 fi
 
 # -----------------------------------------------------------------------------

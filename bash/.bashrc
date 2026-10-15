@@ -192,6 +192,11 @@ if command -v fzf >/dev/null 2>&1; then
   [ -f "$HOME/.local/share/fzf/key-bindings.bash" ] && source "$HOME/.local/share/fzf/key-bindings.bash"
 fi
 
+# Zoxide smart directory jumping (z, zi)
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init bash)"
+fi
+
 # Minimalist CachyOS Pure-style prompt (two-line layout with git branch and ❯ symbol)
 _cachyos_git_branch() {
   local branch

@@ -45,7 +45,7 @@ source ~/.bashrc
 ```
 
 ### What `setup.sh` does:
-1. **Downloads modern CLI tools, Neovim, Fish, Lazygit, Ripgrep & Pokémon Greeting** (`fzf`, `bat`, `eza`, `fastfetch`, `nvim`, `fish`, `lazygit`, `rg`, `pokemon-greeting`) directly to `~/.local/bin`.
+1. **Downloads modern CLI tools, Neovim, Fish, Lazygit, Ripgrep, Zoxide & Pokémon Greeting** (`fzf`, `bat`, `eza`, `fastfetch`, `nvim`, `fish`, `lazygit`, `rg`, `zoxide`, `pokemon-greeting`) directly to `~/.local/bin`.
 2. **Downloads official FZF bash keybindings and completions** to `~/.local/share/fzf/`.
 3. **Symlinks dotfiles** cleanly to `$HOME`:
    - `bash/.bashrc` -> `~/.bashrc`

@@ -57,6 +57,11 @@ if type -q fzf
     set -gx FZF_ALT_C_OPTS "--preview 'eza --tree --level=2 --color=always --icons=always {} 2>/dev/null || ls -la {}'"
 end
 
+# Zoxide smart directory jumping (z, zi)
+if type -q zoxide
+    zoxide init fish | source
+end
+
 # Greeting message (pokemon-terminal-greeting)
 if status is-interactive
     if type -q pokemon-greeting
