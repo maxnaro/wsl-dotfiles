@@ -22,6 +22,10 @@ dotfiles/
 ├── nvim/
 │   └── .config/
 │       └── nvim/
+├── tmux/
+│   └── .config/
+│       └── tmux/
+│           └── tmux.conf
 ├── scripts/
 │   └── .scripts/
 │       └── auto_venv.sh
@@ -51,6 +55,7 @@ source ~/.bashrc
    - `git/.gitconfig` -> `~/.gitconfig`
    - `scripts/.scripts/auto_venv.sh` -> `~/.scripts/auto_venv.sh`
    - `nvim/.config/nvim` -> `~/.config/nvim`
+   - `tmux/.config/tmux` -> `~/.config/tmux`
 4. Creates automatic `.bak` backups if any files already exist in your home directory before linking.
 
 ### (Optional) GNU Stow
@@ -63,4 +68,5 @@ stow -R fish
 stow -R git
 stow -R scripts
 stow -R nvim
+stow -R tmux
 ```

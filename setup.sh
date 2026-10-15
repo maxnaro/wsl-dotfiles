@@ -215,11 +215,16 @@ if [ -d "$DOTFILES_DIR/fish/.config/fish" ]; then
     link_file "$DOTFILES_DIR/fish/.config/fish" "$HOME/.config/fish"
 fi
 
+# Link Tmux configuration (~/.config/tmux)
+if [ -d "$DOTFILES_DIR/tmux/.config/tmux" ]; then
+    link_file "$DOTFILES_DIR/tmux/.config/tmux" "$HOME/.config/tmux"
+fi
+
 # -----------------------------------------------------------------------------
 # 3. Optional: GNU Stow support
 # -----------------------------------------------------------------------------
 if command -v stow >/dev/null 2>&1; then
-    info "GNU Stow detected. You can also run 'stow bash', 'stow git', 'stow scripts', 'stow nvim', or 'stow fish' inside $DOTFILES_DIR"
+    info "GNU Stow detected. You can also run 'stow bash', 'stow git', 'stow scripts', 'stow nvim', 'stow fish', or 'stow tmux' inside $DOTFILES_DIR"
 fi
 
 echo ""
