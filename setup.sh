@@ -45,6 +45,8 @@ case "$ARCH" in
         ARCH_FASTFETCH="linux-amd64"
         ARCH_NVIM="linux-x86_64"
         ARCH_FISH="linux-x86_64"
+        ARCH_LAZYGIT="Linux_x86_64"
+        ARCH_RG="x86_64-unknown-linux-musl"
         ;;
     aarch64|arm64)
         ARCH_FZF="linux_arm64"
@@ -53,6 +55,8 @@ case "$ARCH" in
         ARCH_FASTFETCH="linux-aarch64"
         ARCH_NVIM="linux-arm64"
         ARCH_FISH="linux-aarch64"
+        ARCH_LAZYGIT="Linux_arm64"
+        ARCH_RG="aarch64-unknown-linux-musl"
         ;;
     *)
         error "Unsupported architecture: $ARCH"
@@ -159,6 +163,28 @@ if ! command -v "$BIN_DIR/pokemon-greeting" >/dev/null 2>&1; then
     success "pokemon-terminal-greeting installed"
 else
     success "pokemon-terminal-greeting is already installed"
+fi
+
+# 1.9 LAZYGIT
+if ! command -v "$BIN_DIR/lazygit" >/dev/null 2>&1; then
+    info "Installing lazygit..."
+    LAZYGIT_VERSION=$(curl -sI https://github.com/jesseduffield/lazygit/releases/latest | grep -i location | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo "0.66.1")
+    curl -sL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_${ARCH_LAZYGIT}.tar.gz" | tar -xz -C "$BIN_DIR" lazygit
+    chmod +x "$BIN_DIR/lazygit"
+    success "lazygit v${LAZYGIT_VERSION} installed"
+else
+    success "lazygit is already installed"
+fi
+
+# 1.10 RIPGREP
+if ! command -v "$BIN_DIR/rg" >/dev/null 2>&1; then
+    info "Installing ripgrep..."
+    RG_VERSION=$(curl -sI https://github.com/BurntSushi/ripgrep/releases/latest | grep -i location | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo "15.2.0")
+    curl -sL "https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}/ripgrep-${RG_VERSION}-${ARCH_RG}.tar.gz" | tar -xz --strip-components=1 -C "$BIN_DIR" "ripgrep-${RG_VERSION}-${ARCH_RG}/rg"
+    chmod +x "$BIN_DIR/rg"
+    success "ripgrep v${RG_VERSION} installed"
+else
+    success "ripgrep is already installed"
 fi
 
 # -----------------------------------------------------------------------------
