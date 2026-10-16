@@ -33,6 +33,9 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BIN_DIR="$HOME/.local/bin"
 SHARE_DIR="$HOME/.local/share"
 
+info "Initializing dotfiles submodules..."
+git -C "$DOTFILES_DIR" submodule update --init --recursive
+
 mkdir -p "$BIN_DIR" "$SHARE_DIR/fzf"
 
 # Detect machine architecture

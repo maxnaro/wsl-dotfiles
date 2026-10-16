@@ -25,7 +25,8 @@ dotfiles/
 ├── tmux/
 │   └── .config/
 │       └── tmux/
-│           └── tmux.conf
+│           ├── tmux.conf
+│           └── plugins/tmux-prefix-help/  # Git submodule
 ├── scripts/
 │   └── .scripts/
 │       └── auto_venv.sh
@@ -38,13 +39,16 @@ dotfiles/
 Clone this repository and run the setup script. It requires **no sudo privileges** and installs all dependencies directly to `~/.local/bin`:
 
 ```bash
-git clone <your-repo-url> ~/dotfiles
+git clone --recurse-submodules <your-repo-url> ~/dotfiles
 cd ~/dotfiles
 ./setup.sh
 source ~/.bashrc
 ```
 
 ### What `setup.sh` does:
+
+Initializes Git submodules before installing tools or linking configuration.
+
 1. **Downloads modern CLI tools, Neovim, Fish, Lazygit, Ripgrep, Zoxide & Pokémon Greeting** (`fzf`, `bat`, `eza`, `fastfetch`, `nvim`, `fish`, `lazygit`, `rg`, `zoxide`, `pokemon-greeting`) directly to `~/.local/bin`.
 2. **Downloads official FZF bash keybindings and completions** to `~/.local/share/fzf/`.
 3. **Symlinks dotfiles** cleanly to `$HOME`:
@@ -70,3 +74,22 @@ stow -R scripts
 stow -R nvim
 stow -R tmux
 ```
+
+### Tmux prefix help
+
+The floating shortcut popup lives in the standalone `tmux-prefix-help`
+repository, included as a submodule at
+`tmux/.config/tmux/plugins/tmux-prefix-help`. See its
+[README](tmux/.config/tmux/plugins/tmux-prefix-help/README.md) for installation,
+behavior, and tests.
+
+For an existing checkout, initialize the submodule before reloading tmux:
+
+```bash
+git submodule update --init --recursive
+tmux source-file ~/.config/tmux/tmux.conf
+```
+
+Set `@prefix-help-delay` in `tmux.conf` to adjust the default 500 ms delay.
+Commit plugin changes inside the submodule, then commit its updated pointer
+in this repository.
