@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 #
 # setup.sh - Cross-platform / WSL setup script for dotfiles and modern CLI tooling.
-# Works completely without sudo (installs user-local binaries to ~/.local/bin),
-# but can optionally use sudo / apt if available.
+# Installs tools without sudo; building Rust code requires a system C linker.
 
 set -euo pipefail
 
@@ -73,6 +72,33 @@ esac
 # 1. Download & Install Tools (Zero-sudo required)
 # -----------------------------------------------------------------------------
 info "Installing CLI tools into $BIN_DIR..."
+
+# 1.0 Rust toolchain and tmux prefix help
+# rustup may already be installed without being on this shell's PATH.
+export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
+if ! command -v cc >/dev/null 2>&1; then
+    error "Building tmux-prefix-help requires a C linker (cc). Install your system's C build tools first (e.g. build-essential on Debian/Ubuntu)."
+    exit 1
+fi
+
+if ! command -v rustup >/dev/null 2>&1; then
+    info "Installing Rust with rustup..."
+    curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal --no-modify-path
+else
+    success "rustup is already installed"
+fi
+
+# Ensure stable meets the plugin's minimum Rust version, including on machines
+# with an older installation. Use it explicitly without changing user defaults.
+info "Ensuring the stable Rust toolchain is up to date..."
+rustup toolchain install stable --profile minimal
+
+TMUX_PREFIX_HELP_DIR="$DOTFILES_DIR/tmux/.config/tmux/plugins/tmux-prefix-help"
+info "Building tmux-prefix-help..."
+rustup run stable cargo build --release --locked \
+    --manifest-path "$TMUX_PREFIX_HELP_DIR/Cargo.toml" \
+    --target-dir "$TMUX_PREFIX_HELP_DIR/target"
+success "tmux-prefix-help release binary built"
 
 # 1.1 FZF
 if ! command -v "$BIN_DIR/fzf" >/dev/null 2>&1; then

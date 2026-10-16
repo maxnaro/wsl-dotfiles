@@ -211,3 +211,4 @@ PS1='\w$(_cachyos_git_branch)\n❯ '
 if [[ $- == *i* ]] && [ -z "$FISH_VERSION" ] && command -v fish >/dev/null 2>&1; then
   exec fish
 fi
+. "$HOME/.cargo/env"
