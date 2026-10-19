@@ -13,7 +13,11 @@ function _auto_venv --on-variable PWD --description "Automatically activate/deac
     # Deactivate if leaving the project tree
     if test -n "$VIRTUAL_ENV"
         set -l venv_parent (dirname "$VIRTUAL_ENV")
-        if not string match -q "$venv_parent*" (pwd)
+        if test "$PWD" != "$venv_parent"; and not string match -qr -- '^'(string escape --style=regex -- "$venv_parent")/ "$PWD"
+            # VIRTUAL_ENV can be inherited without Fish's deactivate function.
+            if not functions -q deactivate
+                return
+            end
             deactivate
         end
     end
