@@ -26,7 +26,8 @@ dotfiles/
 │   └── .config/
 │       └── tmux/
 │           ├── tmux.conf
-│           └── plugins/tmux-prefix-help/  # Git submodule
+│           ├── plugins/tmux-prefix-help/  # Git submodule
+│           └── plugins/tmux-runcat/       # Git submodule
 ├── scripts/
 │   └── .scripts/
 │       └── auto_venv.sh
@@ -38,7 +39,8 @@ dotfiles/
 
 Clone this repository and run the setup script. It installs CLI tools into
 `~/.local/bin` and Rust through rustup (normally `~/.cargo` and `~/.rustup`),
-without sudo. Git, curl, and a system C linker (`cc`) must already be installed;
+without sudo. Git, curl, Python 3.11+, tmux, tar with xz support, sha256sum,
+and a system C linker (`cc`) must already be installed;
 on Debian/Ubuntu, `build-essential` provides the C build tools.
 
 ```bash
@@ -55,6 +57,7 @@ Installs rustup noninteractively when missing, installs or updates the minimal
 stable Rust toolchain, and builds the tmux prefix-help release executable
 before linking the tmux configuration. Existing Rust toolchain defaults and
 shell startup files are preserved by the Rust installation step.
+It also builds the Rust `tmux-runcat` plugin and installs its bundled fonts.
 
 1. **Downloads modern CLI tools, Neovim, Fish, Lazygit, Ripgrep, Zoxide & Pokémon Greeting** (`fzf`, `bat`, `eza`, `fastfetch`, `nvim`, `fish`, `lazygit`, `rg`, `zoxide`, `pokemon-greeting`) directly to `~/.local/bin`.
 2. **Downloads official FZF bash keybindings and completions** to `~/.local/share/fzf/`.
@@ -106,3 +109,29 @@ tmux source-file ~/.config/tmux/tmux.conf
 Set `@prefix-help-delay` in `tmux.conf` to adjust the default 500 ms delay.
 Commit plugin changes inside the submodule, then commit its updated pointer
 in this repository.
+
+### Tmux running cat
+
+The cat lives in the standalone Rust `tmux-runcat` plugin, included as a
+submodule at `tmux/.config/tmux/plugins/tmux-runcat`. It runs faster with typing
+and sleeps after two idle seconds. The parent config places it before the
+device icon, device name, and clock.
+
+`./setup.sh` builds the executable and fonts, installs fonts in the terminal's
+host OS, and configures Windows Terminal automatically on WSL. All font build
+inputs are pinned and bundled; the Rust plugin has no third-party dependencies.
+On Linux, select `JetBrainsMono RunCat Active` after setup. See the
+[plugin README](tmux/.config/tmux/plugins/tmux-runcat/README.md) for options,
+font setup, tests, and TPM installation.
+
+After updating the plugin submodule:
+
+```bash
+git submodule update --init --recursive
+cargo build --release --locked --offline --manifest-path tmux/.config/tmux/plugins/tmux-runcat/Cargo.toml
+bash tmux/.config/tmux/plugins/tmux-runcat/fonts/setup.sh
+tmux source-file ~/.config/tmux/tmux.conf
+```
+
+Commit plugin changes in its repository, then commit its updated submodule
+pointer in this repository.

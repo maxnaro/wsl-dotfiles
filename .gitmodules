@@ -1,3 +1,6 @@
 [submodule "tmux/.config/tmux/plugins/tmux-prefix-help"]
 	path = tmux/.config/tmux/plugins/tmux-prefix-help
 	url = git@github.com:maxnaro/tmux-prefix-help.git
+[submodule "tmux/.config/tmux/plugins/tmux-runcat"]
+	path = tmux/.config/tmux/plugins/tmux-runcat
+	url = git@github.com:maxnaro/tmux-runcat.git

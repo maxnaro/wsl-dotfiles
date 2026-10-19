@@ -32,6 +32,12 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BIN_DIR="$HOME/.local/bin"
 SHARE_DIR="$HOME/.local/share"
 
+# RunCat's pinned build tool needs Python 3.11+, but does not need pip or venv.
+if ! command -v python3 >/dev/null 2>&1 || ! python3 -c 'import sys; sys.exit(sys.version_info < (3, 11))'; then
+    error "Setup requires Python 3.11 or newer on PATH (for the tmux RunCat font build)."
+    exit 1
+fi
+
 info "Initializing dotfiles submodules..."
 git -C "$DOTFILES_DIR" submodule update --init --recursive
 
@@ -99,6 +105,13 @@ rustup run stable cargo build --release --locked \
     --manifest-path "$TMUX_PREFIX_HELP_DIR/Cargo.toml" \
     --target-dir "$TMUX_PREFIX_HELP_DIR/target"
 success "tmux-prefix-help release binary built"
+
+TMUX_RUNCAT_DIR="$DOTFILES_DIR/tmux/.config/tmux/plugins/tmux-runcat"
+info "Building tmux-runcat..."
+rustup run stable cargo build --release --locked --offline \
+    --manifest-path "$TMUX_RUNCAT_DIR/Cargo.toml" \
+    --target-dir "$TMUX_RUNCAT_DIR/target"
+success "tmux-runcat release binary built"
 
 # 1.1 FZF
 if ! command -v "$BIN_DIR/fzf" >/dev/null 2>&1; then
@@ -285,6 +298,8 @@ fi
 
 # Link Tmux configuration (~/.config/tmux)
 if [ -d "$DOTFILES_DIR/tmux/.config/tmux" ]; then
+    info "Building and installing pinned JetBrainsMono / RunCat fonts..."
+    bash "$DOTFILES_DIR/tmux/.config/tmux/plugins/tmux-runcat/fonts/setup.sh"
     link_file "$DOTFILES_DIR/tmux/.config/tmux" "$HOME/.config/tmux"
 fi
 
