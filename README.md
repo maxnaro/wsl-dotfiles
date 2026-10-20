@@ -120,7 +120,7 @@ device icon, device name, and clock.
 `./setup.sh` builds the executable and fonts, installs fonts in the terminal's
 host OS, and configures Windows Terminal automatically on WSL. All font build
 inputs are pinned and bundled; the Rust plugin has no third-party dependencies.
-On Linux, select `JetBrainsMono RunCat Active` after setup. See the
+On Linux, select `JetBrainsMono RunCat v2` after setup. See the
 [plugin README](tmux/.config/tmux/plugins/tmux-runcat/README.md) for options,
 font setup, tests, and TPM installation.
 
