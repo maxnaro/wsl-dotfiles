@@ -298,7 +298,7 @@ fi
 
 # Link Tmux configuration (~/.config/tmux)
 if [ -d "$DOTFILES_DIR/tmux/.config/tmux" ]; then
-    info "Building and installing pinned JetBrainsMono / RunCat fonts..."
+    info "Building and installing RunCat fonts (customizable with RUNCAT_BASE_FONT)..."
     bash "$DOTFILES_DIR/tmux/.config/tmux/plugins/tmux-runcat/fonts/setup.sh"
     link_file "$DOTFILES_DIR/tmux/.config/tmux" "$HOME/.config/tmux"
 fi
