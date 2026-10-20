@@ -127,6 +127,18 @@ On Linux, select `JetBrainsMono RunCat v3` after setup. See the
 [plugin README](tmux/.config/tmux/plugins/tmux-runcat/README.md) for options,
 font setup, tests, and TPM installation.
 
+To use a different base font during setup:
+
+```bash
+RUNCAT_BASE_FONT="$HOME/fonts/MyMono-Regular.ttf" ./setup.sh
+```
+
+Optional `RUNCAT_BOLD_FONT`, `RUNCAT_ITALIC_FONT`, and
+`RUNCAT_BOLD_ITALIC_FONT` select matching faces; `RUNCAT_FONT_FAMILY` names the
+patched family. Use static monospaced TrueType files, with a Nerd Font base
+to retain device icons. Keep the same font files and options for reproducible
+custom setup. The bundled JetBrainsMono font remains the default.
+
 After updating the plugin submodule:
 
 ```bash
