@@ -115,15 +115,18 @@ in this repository.
 The cat lives in the standalone Rust `tmux-runcat` plugin, included as a
 submodule at `tmux/.config/tmux/plugins/tmux-runcat`. It runs faster with typing
 without a speed cap and sleeps after two idle seconds. The parent config
-places it before the device icon, device name, and clock.
+places it before the device icon, device name, and clock. It selects the
+Pet Cats skin: stretching on wake, walking/running with typing, varied pause
+gestures, and lying down before sleeping with subtle breathing.
 
 Use `set -g @runcat-size small`, `medium`, or `large` in `tmux.conf` to select
 one-, two-, or three-cell cats. The default is `medium`; changes apply live.
+Use `set -g @runcat-skin classic` to switch to the original silhouette.
 
 `./setup.sh` builds the executable and fonts, installs fonts in the terminal's
 host OS, and configures Windows Terminal automatically on WSL. All font build
 inputs are pinned and bundled; the Rust plugin has no third-party dependencies.
-On Linux, select `JetBrainsMono RunCat v3` after setup. See the
+On Linux, select `JetBrainsMono RunCat v4` after setup. See the
 [plugin README](tmux/.config/tmux/plugins/tmux-runcat/README.md) for options,
 font setup, tests, and TPM installation.
 
