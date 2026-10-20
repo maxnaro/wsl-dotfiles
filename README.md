@@ -117,10 +117,13 @@ submodule at `tmux/.config/tmux/plugins/tmux-runcat`. It runs faster with typing
 and sleeps after two idle seconds. The parent config places it before the
 device icon, device name, and clock.
 
+Use `set -g @runcat-size small`, `medium`, or `large` in `tmux.conf` to select
+one-, two-, or three-cell cats. The default is `medium`; changes apply live.
+
 `./setup.sh` builds the executable and fonts, installs fonts in the terminal's
 host OS, and configures Windows Terminal automatically on WSL. All font build
 inputs are pinned and bundled; the Rust plugin has no third-party dependencies.
-On Linux, select `JetBrainsMono RunCat v2` after setup. See the
+On Linux, select `JetBrainsMono RunCat v3` after setup. See the
 [plugin README](tmux/.config/tmux/plugins/tmux-runcat/README.md) for options,
 font setup, tests, and TPM installation.
 
