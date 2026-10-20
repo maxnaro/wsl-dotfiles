@@ -114,8 +114,8 @@ in this repository.
 
 The cat lives in the standalone Rust `tmux-runcat` plugin, included as a
 submodule at `tmux/.config/tmux/plugins/tmux-runcat`. It runs faster with typing
-and sleeps after two idle seconds. The parent config places it before the
-device icon, device name, and clock.
+without a speed cap and sleeps after two idle seconds. The parent config
+places it before the device icon, device name, and clock.
 
 Use `set -g @runcat-size small`, `medium`, or `large` in `tmux.conf` to select
 one-, two-, or three-cell cats. The default is `medium`; changes apply live.
