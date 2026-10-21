@@ -114,11 +114,12 @@ in this repository.
 
 The cat lives in the standalone Rust `tmux-runcat` plugin, included as a
 submodule at `tmux/.config/tmux/plugins/tmux-runcat`. It runs faster with typing
-without a speed cap and sleeps after two idle seconds. The parent config
+without a speed cap and sleeps after three idle seconds. The parent config
 places it before the device icon, device name, and clock. It selects the
 Pet Cats skin: stretching on wake, walking/running with typing, varied pause
 gestures, and lying down before sleeping with subtle breathing. The cat uses
-the status foreground (cyan) and the four-cell `xlarge` preset.
+the status foreground (cyan) and the four-cell `xlarge` preset. The three-second
+idle delay gives pause gestures about 1.3 seconds to play before lying down.
 
 Use `set -g @runcat-size small`, `medium`, `large`, or `xlarge` in `tmux.conf`
 to select one-, two-, three-, or four-cell cats. The plugin defaults to `medium`;
