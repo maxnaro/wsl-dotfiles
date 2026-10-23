@@ -71,3 +71,5 @@ if status is-interactive
     end
 end
 
+# Delete branches without remote (git)
+alias grm = 'git fetch -p && git branch -r | awk '{print $1}' | grep -Ev -f /dev/fd/0 (git branch -vv | grep origin | psub) | awk '{print $1}' | xargs -r git branch -d'
