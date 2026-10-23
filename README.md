@@ -121,6 +121,13 @@ gestures, and lying down before sleeping with subtle breathing. The cat uses
 the status foreground (cyan) and the four-cell `xlarge` preset. The three-second
 idle delay gives pause gestures about 1.3 seconds to play before lying down.
 
+Animation frames and key counts use hidden tmux session variables to avoid
+full client redraws. The status format uses `#{RUNCAT_FRAME}`. Synchronized
+rendering is enabled for `xterm-256color` clients to reduce flicker; this requires
+a terminal with DECSET 2026 support, such as Windows Terminal 1.23.20211.0 or
+newer. Detach and reattach existing clients after reloading the config to apply
+that terminal feature.
+
 Use `set -g @runcat-size small`, `medium`, `large`, or `xlarge` in `tmux.conf`
 to select one-, two-, three-, or four-cell cats. The plugin defaults to `medium`;
 this configuration selects `xlarge`. Changes apply live.
