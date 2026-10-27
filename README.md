@@ -85,65 +85,6 @@ stow -R nvim
 stow -R tmux
 ```
 
-### Neovim AI assistants
-
-Copilot provides automatic inline suggestions. Codex and Claude Code are
-available through a Sidekick terminal panel for prompted tasks; switching CLI
-assistants leaves Copilot as the inline completion provider.
-
-To install missing Codex and Claude Code CLIs without sudo:
-
-```bash
-INSTALL_AI_TOOLS=1 ./setup.sh
-```
-
-Ordinary setup skips these optional tools, and existing CLI installations are
-preserved. The official native installers select the platform build. Restart
-your shell after installation so `~/.local/bin` is on PATH.
-
-Start Neovim and let Lazy install the configured plugins (or run `:Lazy install`).
-Authentication is separate from installation:
-
-- Run `:Copilot auth` in Neovim with a GitHub account that has Copilot access.
-- Run `codex login` in your shell to sign in to Codex.
-- Run `claude` in your shell and complete its first-launch sign-in.
-
-Each assistant uses its own account and entitlement. Codex supports ChatGPT
-subscription sign-in or API keys; Claude Code supports its own subscription
-and provider credentials. See the official
-[Codex installation](https://learn.chatgpt.com/docs/codex/cli),
-[Codex authentication](https://learn.chatgpt.com/docs/auth), and
-[Claude Code setup](https://code.claude.com/docs/en/setup) guides.
-
-`<leader>` is Space in this LazyVim configuration.
-
-| Key | Action |
-| --- | --- |
-| Tab | Accept a visible completion menu item, jump to the next snippet placeholder, accept a Copilot suggestion, or insert normal Tab, in that order |
-| Shift-Tab | Previous menu item, previous snippet placeholder, or normal fallback |
-| Alt-`]` / Alt-`[` | Next / previous Copilot suggestion |
-| Ctrl-`]` | Dismiss the Copilot suggestion |
-| `<leader>au` | Toggle Copilot attachment for the current buffer |
-| `<leader>as` | Pick an installed assistant or existing session |
-| `<leader>aa` | Toggle or focus an attached assistant; select one when needed |
-| `<leader>ac` / `<leader>aC` | Toggle Codex / Claude Code directly |
-| `<leader>af` | Send the current file to an assistant |
-| `<leader>av` (visual mode) | Send the selected text to an assistant |
-
-Copilot suggestions hide while the completion menu is visible. Existing
-Alt-H/J/K/L window navigation remains available. Use `Ctrl-\\ Ctrl-N` to leave
-terminal input mode, then `<leader>aa` to return to your code.
-
-Sidekick opens on the right and keeps CLI sessions alive through tmux when it
-is installed; otherwise it uses ordinary Neovim terminal sessions. Reopen a
-session through `<leader>as`. CLI file watching uses Neovim's `autoread`; save
-your buffer before asking an assistant to edit the same file and review its
-changes before continuing.
-
-Use `:checkhealth sidekick` to inspect CLI availability. Its Copilot LSP checks
-describe the unused next-edit feature; this setup uses `copilot.lua` for inline
-suggestions and intentionally disables Sidekick next-edit/status handling.
-
 ### Tmux prefix help
 
 The floating shortcut popup lives in the standalone `tmux-prefix-help`
