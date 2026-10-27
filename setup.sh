@@ -28,6 +28,43 @@ error() {
     printf "${RED}✖${NC} %s\n" "$1"
 }
 
+# Use a subshell so each installer has its own temporary file and cleanup trap.
+install_ai_cli() (
+    local ai_tool="$1"
+    local ai_installer_url="$2"
+    local ai_interpreter="$3"
+    local ai_installer
+
+    if command -v "$ai_tool" >/dev/null 2>&1 || [ -x "$BIN_DIR/$ai_tool" ]; then
+        success "$ai_tool is already installed"
+        return
+    fi
+
+    info "Installing $ai_tool with its official native installer..."
+    ai_installer=$(mktemp)
+    trap 'rm -f "$ai_installer"' EXIT
+    if ! curl -fsSL "$ai_installer_url" -o "$ai_installer"; then
+        error "Failed to download the $ai_tool installer."
+        return 1
+    fi
+    if ! "$ai_interpreter" "$ai_installer"; then
+        error "Failed to install $ai_tool."
+        return 1
+    fi
+    if ! command -v "$ai_tool" >/dev/null 2>&1 && [ ! -x "$BIN_DIR/$ai_tool" ]; then
+        error "$ai_tool installer finished, but no executable was found on PATH or in $BIN_DIR."
+        return 1
+    fi
+    success "$ai_tool installed; sign in separately before using it in Neovim"
+)
+
+install_ai_tools() {
+    if [ "${INSTALL_AI_TOOLS:-0}" = "1" ]; then
+        install_ai_cli codex https://chatgpt.com/codex/install.sh sh
+        install_ai_cli claude https://claude.ai/install.sh bash
+    fi
+}
+
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BIN_DIR="$HOME/.local/bin"
 SHARE_DIR="$HOME/.local/share"
@@ -241,6 +278,11 @@ if ! command -v "$BIN_DIR/zoxide" >/dev/null 2>&1; then
 else
     success "zoxide is already installed"
 fi
+
+# -----------------------------------------------------------------------------
+# 1.12 Optional AI CLI tools (INSTALL_AI_TOOLS=1 ./setup.sh)
+# -----------------------------------------------------------------------------
+install_ai_tools
 
 # -----------------------------------------------------------------------------
 # 2. Symlink Dotfiles
