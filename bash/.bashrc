@@ -218,3 +218,7 @@ _cachyos_git_branch() {
   fi
 }
 PS1='\w$(_cachyos_git_branch)\n❯ '
+
+if command -v atuin >/dev/null 2>&1 && [[ ${__atuin_initialized:-false} != true ]]; then
+  eval "$(atuin init bash --disable-up-arrow)"
+fi

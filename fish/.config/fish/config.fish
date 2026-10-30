@@ -84,3 +84,7 @@ if status is-interactive
     end
 end
 
+if type -q atuin; and not set -q _dotfiles_atuin_initialized
+    atuin init fish --disable-up-arrow | source
+    set -g _dotfiles_atuin_initialized 1
+end

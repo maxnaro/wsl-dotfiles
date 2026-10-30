@@ -40,4 +40,3 @@ class Features(unittest.TestCase):
 
     def test_empty_project_list_does_not_connect(self):
         self.assertEqual(self.workspace(entries=''), (0, None))
-

@@ -145,6 +145,8 @@ link_file() {
 }
 
 # Link bash configuration
+link_file "$DOTFILES_DIR/atuin/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml"
+
 link_file "$DOTFILES_DIR/bash/.bashrc" "$HOME/.bashrc"
 link_file "$DOTFILES_DIR/bash/.bash_aliases" "$HOME/.bash_aliases"
 if [ -f "$DOTFILES_DIR/bash/.inputrc" ]; then
