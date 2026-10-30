@@ -1,0 +1,49 @@
+# Maintaining this setup
+
+Run `./setup.sh` for the complete installation on Linux or WSL, on x86_64 or ARM64.
+Git, curl, Python 3.11+, tar with gzip/xz support, sha256sum, tmux, and a C linker
+must already be available. Submodules use SSH URLs and require GitHub SSH access.
+Rust follows the existing stable-toolchain policy. No sudo is used.
+
+## Downloads and reruns
+
+`setup/tools.json` records release versions, official download URLs, and SHA-256
+hashes for both architectures. Installed tools are retained and their versions
+are displayed beside the pins. To update a pin, review the upstream release,
+replace both architecture URLs and hashes using official release metadata,
+and validate on the target architectures. FZF shell scripts use the pinned FZF
+release and their own hashes; update these together.
+
+Missing tools are downloaded and checked in temporary staging directories before
+installation. Neovim keeps its runtime under `~/.local/share/dotfiles/`. Interrupted
+setup can be rerun; completed components remain installed. This is not a global
+transaction. Configuration links are created only after builds and font setup
+succeed. Existing destinations move to unique adjacent `.bak.*` directories,
+with the original stored as `original`. Keep these until satisfied with setup.
+Correct symlinks are retained. A failed replacement link restores its backup.
+
+Pokémon greeting source is pinned to the manifest commit. Its upstream installer
+still downloads sprites from the moving pokemon-colorscripts main branch.
+Rustup bootstrap and stable Rust also remain network-dependent moving inputs.
+
+## Shells and machine settings
+
+Interactive Bash starts Fish when available. Use `DOTFILES_NO_FISH=1 bash` for
+Bash fallback. Missing optional Rust/NVM/Pyenv files do not prevent startup.
+
+Use `~/.bashrc.local` and `~/.config/fish/local.fish` for machine settings. They are
+optional. The Fish override and generated `fish_variables` file are ignored by
+Git. Existing universal variables remain on disk when tracking is removed.
+Fish uses session PATH modifications rather than persisting new universal paths.
+
+Only WSL sessions filter mounted Windows paths. A VS Code directory already on
+PATH is retained; if it is absent, add the appropriate directory in the local
+override file. No Windows username is assumed.
+
+## Validation
+
+Run `python3 -m unittest discover -s tests`, `bash -n setup.sh bash/.bashrc
+bash/.bash_aliases scripts/.scripts/auto_venv.sh`, and `fish -n` on the tracked
+Fish scripts. Tests use temporary homes and mocked downloads and do not execute
+the real full setup. Release metadata has been verified for both architectures;
+ARM64 binaries still require a real ARM64 machine for execution validation.
