@@ -1,0 +1,142 @@
+{
+  "fzf": {
+    "version": "v0.74.5",
+    "assets": {
+      "x86_64": {
+        "url": "https://github.com/junegunn/fzf/releases/download/v0.74.5/fzf-0.74.5-linux_amd64.tar.gz",
+        "sha256": "d47d7f882972c7d674dbbba998ffa4116e68379616ffac7695d0671e9a722c5f"
+      },
+      "aarch64": {
+        "url": "https://github.com/junegunn/fzf/releases/download/v0.74.5/fzf-0.74.5-linux_arm64.tar.gz",
+        "sha256": "cf058001da21724a469b714a29cf4aab9cbe860d218a0d6c1b5b661efad7784c"
+      }
+    }
+  },
+  "bat": {
+    "version": "v0.26.1",
+    "assets": {
+      "x86_64": {
+        "url": "https://github.com/sharkdp/bat/releases/download/v0.26.1/bat-v0.26.1-x86_64-unknown-linux-musl.tar.gz",
+        "sha256": "0dcd8ac79732c0d5b136f11f4ee00e581440e16a44eab5b3105b611bbf2cf191"
+      },
+      "aarch64": {
+        "url": "https://github.com/sharkdp/bat/releases/download/v0.26.1/bat-v0.26.1-aarch64-unknown-linux-musl.tar.gz",
+        "sha256": "6369242c584065f195fb20cb36fbd7cb63ae690605bbe89868a7596b596c2c23"
+      }
+    }
+  },
+  "eza": {
+    "version": "v0.23.5",
+    "assets": {
+      "x86_64": {
+        "url": "https://github.com/eza-community/eza/releases/download/v0.23.5/eza_x86_64-unknown-linux-musl.tar.gz",
+        "sha256": "e06eebab74b73d6b7d51a796a353824b001bea82df077706382e100815d28904"
+      },
+      "aarch64": {
+        "url": "https://github.com/eza-community/eza/releases/download/v0.23.5/eza_aarch64-unknown-linux-gnu.tar.gz",
+        "sha256": "40b87ae8628aa2ff0f0d2dc24ab52f689631366385c3da630bae745671fd71ec"
+      }
+    }
+  },
+  "fastfetch": {
+    "version": "2.69.0",
+    "assets": {
+      "x86_64": {
+        "url": "https://github.com/fastfetch-cli/fastfetch/releases/download/2.69.0/fastfetch-linux-amd64.tar.gz",
+        "sha256": "9fe880a34de3fec88e57a69230c02fd7be0846db3f3ea9f88f2b74489a79ff55"
+      },
+      "aarch64": {
+        "url": "https://github.com/fastfetch-cli/fastfetch/releases/download/2.69.0/fastfetch-linux-aarch64.tar.gz",
+        "sha256": "843a0d4e3d604efc7cce18df1efcc09b00a1960cfea9949118b50bf999694027"
+      }
+    }
+  },
+  "nvim": {
+    "version": "v0.11.6",
+    "assets": {
+      "x86_64": {
+        "url": "https://github.com/neovim/neovim/releases/download/v0.11.6/nvim-linux-x86_64.tar.gz",
+        "sha256": "2fc90b962327f73a78afbfb8203fd19db8db9cdf4ee5e2bef84704339add89cc"
+      },
+      "aarch64": {
+        "url": "https://github.com/neovim/neovim/releases/download/v0.11.6/nvim-linux-arm64.tar.gz",
+        "sha256": "8ddc0c101846145e830b17bbca50782ca9307eee4fab539d9e2ddaf8793c06f1"
+      }
+    }
+  },
+  "fish": {
+    "version": "4.9.3",
+    "assets": {
+      "x86_64": {
+        "url": "https://github.com/fish-shell/fish-shell/releases/download/4.9.3/fish-4.9.3-linux-x86_64.tar.xz",
+        "sha256": "8f643d10ad1abb0ef7072764c01ceb5cf61b2d373fda400cf60f0bad69b7e095"
+      },
+      "aarch64": {
+        "url": "https://github.com/fish-shell/fish-shell/releases/download/4.9.3/fish-4.9.3-linux-aarch64.tar.xz",
+        "sha256": "57349f0111728c64b703a84e611aa97ff4d1fa8466385d64e67bd5bc3ffa49fc"
+      }
+    }
+  },
+  "lazygit": {
+    "version": "v0.66.1",
+    "assets": {
+      "x86_64": {
+        "url": "https://github.com/jesseduffield/lazygit/releases/download/v0.66.1/lazygit_0.66.1_linux_x86_64.tar.gz",
+        "sha256": "7b3f30c2c06a42cf575280f907e58d7ea08411408b6b62bc926bc91cbc6c3f46"
+      },
+      "aarch64": {
+        "url": "https://github.com/jesseduffield/lazygit/releases/download/v0.66.1/lazygit_0.66.1_linux_arm64.tar.gz",
+        "sha256": "add91327af13343f37d2d610512d0982ef5c75da5cc962b5159748adc8a11a86"
+      }
+    }
+  },
+  "rg": {
+    "version": "15.2.0",
+    "assets": {
+      "x86_64": {
+        "url": "https://github.com/BurntSushi/ripgrep/releases/download/15.2.0/ripgrep-15.2.0-x86_64-unknown-linux-musl.tar.gz",
+        "sha256": "33e15bcf1624b25cdd2a55813a47a2f95dbe126268203e76aa6a585d1e7b149c"
+      },
+      "aarch64": {
+        "url": "https://github.com/BurntSushi/ripgrep/releases/download/15.2.0/ripgrep-15.2.0-aarch64-unknown-linux-musl.tar.gz",
+        "sha256": "800b1e7206afe799dfb5a6901f23147cfaabe0e52210538100f61e86e1740915"
+      }
+    }
+  },
+  "zoxide": {
+    "version": "v0.10.0",
+    "assets": {
+      "x86_64": {
+        "url": "https://github.com/ajeetdsouza/zoxide/releases/download/v0.10.0/zoxide-0.10.0-x86_64-unknown-linux-musl.tar.gz",
+        "sha256": "2d93385b99f3e82cf2701609a1bffcad863fbeb75aa3fe7eb6be4d29be68b1ae"
+      },
+      "aarch64": {
+        "url": "https://github.com/ajeetdsouza/zoxide/releases/download/v0.10.0/zoxide-0.10.0-aarch64-unknown-linux-musl.tar.gz",
+        "sha256": "f1f16c5d6298d63dee467eedea1cdcd8490e43e493bea43acd416dc9033ef641"
+      }
+    }
+  },
+  "fzf-completion": {
+    "version": "v0.74.5",
+    "file": "completion.bash",
+    "assets": {
+      "all": {
+        "url": "https://raw.githubusercontent.com/junegunn/fzf/v0.74.5/shell/completion.bash",
+        "sha256": "263f7c4e602c002747175c69efa507bd3fb663633bb2419efda2e7641ffb6912"
+      }
+    }
+  },
+  "fzf-key-bindings": {
+    "version": "v0.74.5",
+    "file": "key-bindings.bash",
+    "assets": {
+      "all": {
+        "url": "https://raw.githubusercontent.com/junegunn/fzf/v0.74.5/shell/key-bindings.bash",
+        "sha256": "89103adb2e29816b0ed8f36814ce4c95945a5f1c7dcd3b0620d2973ea2dbd6ea"
+      }
+    }
+  },
+  "pokemon": {
+    "commit": "6ed2de893795b71c3ceaa1599b0585fc8cb23c56"
+  }
+}

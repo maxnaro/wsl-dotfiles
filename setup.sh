@@ -28,6 +28,15 @@ error() {
     printf "${RED}✖${NC} %s\n" "$1"
 }
 
+# Validate prerequisites before creating installation directories.
+for prerequisite in git curl python3 tar sha256sum cc tmux; do
+    command -v "$prerequisite" >/dev/null 2>&1 || { error "Missing prerequisite: $prerequisite"; exit 1; }
+done
+[[ $(uname -s) == Linux ]] || { error "Setup supports Linux and WSL only"; exit 1; }
+SETUP_STAGE=$(mktemp -d)
+trap 'rm -rf -- "$SETUP_STAGE"' EXIT
+trap 'error "Setup failed at line $LINENO; rerun after resolving the error"' ERR
+
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BIN_DIR="$HOME/.local/bin"
 SHARE_DIR="$HOME/.local/share"
@@ -38,41 +47,15 @@ if ! command -v python3 >/dev/null 2>&1 || ! python3 -c 'import sys; sys.exit(sy
     exit 1
 fi
 
+case "$(uname -m)" in
+    x86_64|amd64|aarch64|arm64) ;;
+    *) error "Unsupported architecture: $(uname -m)"; exit 1 ;;
+esac
+
 info "Initializing dotfiles submodules..."
 git -C "$DOTFILES_DIR" submodule update --init --recursive
 
 mkdir -p "$BIN_DIR" "$SHARE_DIR/fzf"
-
-# Detect machine architecture
-ARCH="$(uname -m)"
-case "$ARCH" in
-    x86_64|amd64)
-        ARCH_FZF="linux_amd64"
-        ARCH_BAT="x86_64-unknown-linux-musl"
-        ARCH_EZA="x86_64-unknown-linux-musl"
-        ARCH_FASTFETCH="linux-amd64"
-        ARCH_NVIM="linux-x86_64"
-        ARCH_FISH="linux-x86_64"
-        ARCH_LAZYGIT="Linux_x86_64"
-        ARCH_RG="x86_64-unknown-linux-musl"
-        ARCH_ZOXIDE="x86_64-unknown-linux-musl"
-        ;;
-    aarch64|arm64)
-        ARCH_FZF="linux_arm64"
-        ARCH_BAT="aarch64-unknown-linux-musl"
-        ARCH_EZA="aarch64-unknown-linux-musl"
-        ARCH_FASTFETCH="linux-aarch64"
-        ARCH_NVIM="linux-arm64"
-        ARCH_FISH="linux-aarch64"
-        ARCH_LAZYGIT="Linux_arm64"
-        ARCH_RG="aarch64-unknown-linux-musl"
-        ARCH_ZOXIDE="aarch64-unknown-linux-musl"
-        ;;
-    *)
-        error "Unsupported architecture: $ARCH"
-        exit 1
-        ;;
-esac
 
 # -----------------------------------------------------------------------------
 # 1. Download & Install Tools (Zero-sudo required)
@@ -89,7 +72,8 @@ fi
 
 if ! command -v rustup >/dev/null 2>&1; then
     info "Installing Rust with rustup..."
-    curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal --no-modify-path
+    curl --fail --show-error --location --retry 3 --connect-timeout 15 https://sh.rustup.rs -o "$SETUP_STAGE/rustup-init.sh"
+    sh "$SETUP_STAGE/rustup-init.sh" -y --profile minimal --no-modify-path
 else
     success "rustup is already installed"
 fi
@@ -113,138 +97,24 @@ rustup run stable cargo build --release --locked --offline \
     --target-dir "$TMUX_RUNCAT_DIR/target"
 success "tmux-runcat release binary built"
 
-# 1.1 FZF
-if ! command -v "$BIN_DIR/fzf" >/dev/null 2>&1; then
-    info "Installing fzf..."
-    FZF_VERSION=$(curl -sI https://github.com/junegunn/fzf/releases/latest | grep -i location | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo "0.74.5")
-    curl -sL "https://github.com/junegunn/fzf/releases/download/v${FZF_VERSION}/fzf-${FZF_VERSION}-${ARCH_FZF}.tar.gz" | tar -xz -C "$BIN_DIR"
-    chmod +x "$BIN_DIR/fzf"
-    success "fzf v${FZF_VERSION} installed"
-else
-    success "fzf is already installed"
+python3 "$DOTFILES_DIR/setup/install_tools.py"
+
+if ! command -v pokemon-greeting >/dev/null 2>&1 && [[ ! -x "$BIN_DIR/pokemon-greeting" ]]; then
+    info "Installing pinned pokemon-terminal-greeting source..."
+    POKEMON_COMMIT=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["pokemon"]["commit"])' "$DOTFILES_DIR/setup/tools.json")
+    git clone --no-checkout https://github.com/Youpen-y/pokemon-terminal-greeting.git "$SETUP_STAGE/pokemon"
+    git -C "$SETUP_STAGE/pokemon" checkout --detach "$POKEMON_COMMIT"
+    "$SETUP_STAGE/pokemon/install.sh" --no-hook
 fi
-
-# Download fzf shell scripts
-curl -sL https://raw.githubusercontent.com/junegunn/fzf/master/shell/key-bindings.bash -o "$SHARE_DIR/fzf/key-bindings.bash"
-curl -sL https://raw.githubusercontent.com/junegunn/fzf/master/shell/completion.bash -o "$SHARE_DIR/fzf/completion.bash"
-
-# 1.2 BAT
-if ! command -v "$BIN_DIR/bat" >/dev/null 2>&1; then
-    info "Installing bat..."
-    BAT_VERSION=$(curl -sI https://github.com/sharkdp/bat/releases/latest | grep -i location | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo "0.26.1")
-    curl -sL "https://github.com/sharkdp/bat/releases/download/v${BAT_VERSION}/bat-v${BAT_VERSION}-${ARCH_BAT}.tar.gz" | tar -xz --strip-components=1 -C "$BIN_DIR" "bat-v${BAT_VERSION}-${ARCH_BAT}/bat"
-    chmod +x "$BIN_DIR/bat"
-    success "bat v${BAT_VERSION} installed"
-else
-    success "bat is already installed"
-fi
-
-# 1.3 EZA
-if ! command -v "$BIN_DIR/eza" >/dev/null 2>&1; then
-    info "Installing eza..."
-    EZA_VERSION=$(curl -sI https://github.com/eza-community/eza/releases/latest | grep -i location | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo "0.23.5")
-    curl -sL "https://github.com/eza-community/eza/releases/download/v${EZA_VERSION}/eza_${ARCH_EZA}.tar.gz" | tar -xz -C "$BIN_DIR"
-    chmod +x "$BIN_DIR/eza"
-    success "eza v${EZA_VERSION} installed"
-else
-    success "eza is already installed"
-fi
-
-# 1.4 FASTFETCH
-if ! command -v "$BIN_DIR/fastfetch" >/dev/null 2>&1; then
-    info "Installing fastfetch..."
-    FF_VERSION=$(curl -sI https://github.com/fastfetch-cli/fastfetch/releases/latest | grep -i location | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo "2.69.0")
-    curl -sL "https://github.com/fastfetch-cli/fastfetch/releases/download/${FF_VERSION}/fastfetch-${ARCH_FASTFETCH}.tar.gz" | tar -xz --strip-components=3 -C "$BIN_DIR" "fastfetch-${ARCH_FASTFETCH}/usr/bin/fastfetch"
-    chmod +x "$BIN_DIR/fastfetch"
-    success "fastfetch v${FF_VERSION} installed"
-else
-    success "fastfetch is already installed"
-fi
-
-# 1.5 FD (symlink to fdfind if available)
-if ! command -v "$BIN_DIR/fd" >/dev/null 2>&1; then
-    if command -v fdfind >/dev/null 2>&1; then
-        ln -sf "$(command -v fdfind)" "$BIN_DIR/fd"
-        success "fd symlinked to fdfind"
-    elif command -v fd >/dev/null 2>&1; then
-        success "fd is already available"
-    else
-        warn "fdfind/fd not found on PATH. Install 'fd-find' via apt or your package manager if available."
-    fi
-else
-    success "fd is available"
-fi
-
-# 1.6 NEOVIM
-if ! command -v "$BIN_DIR/nvim" >/dev/null 2>&1 && ! command -v nvim >/dev/null 2>&1; then
-    info "Installing Neovim..."
-    NVIM_VERSION=$(curl -sI https://github.com/neovim/neovim/releases/latest | grep -i location | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo "0.12.6")
-    curl -sL "https://github.com/neovim/neovim/releases/download/v${NVIM_VERSION}/nvim-${ARCH_NVIM}.tar.gz" | tar -xz --strip-components=1 -C "$HOME/.local"
-    chmod +x "$BIN_DIR/nvim"
-    success "Neovim v${NVIM_VERSION} installed"
-else
-    success "Neovim is already available"
-fi
-
-# 1.7 FISH SHELL
-if ! command -v "$BIN_DIR/fish" >/dev/null 2>&1 && ! command -v fish >/dev/null 2>&1; then
-    info "Installing Fish Shell..."
-    FISH_VERSION=$(curl -sI https://github.com/fish-shell/fish-shell/releases/latest | grep -i location | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo "4.9.3")
-    curl -sL "https://github.com/fish-shell/fish-shell/releases/download/${FISH_VERSION}/fish-${FISH_VERSION}-${ARCH_FISH}.tar.xz" | tar -xJ -C "$BIN_DIR"
-    chmod +x "$BIN_DIR/fish"
-    success "Fish Shell v${FISH_VERSION} installed"
-else
-    success "Fish Shell is already available"
-fi
-
-# 1.8 POKEMON TERMINAL GREETING
-if ! command -v "$BIN_DIR/pokemon-greeting" >/dev/null 2>&1; then
-    info "Installing pokemon-terminal-greeting..."
-    TMP_PKG=$(mktemp -d)
-    git clone --depth 1 https://github.com/Youpen-y/pokemon-terminal-greeting.git "$TMP_PKG"
-    "$TMP_PKG/install.sh" --no-hook
-    rm -rf "$TMP_PKG"
-    success "pokemon-terminal-greeting installed"
-else
-    success "pokemon-terminal-greeting is already installed"
-fi
-
-# 1.9 LAZYGIT
-if ! command -v "$BIN_DIR/lazygit" >/dev/null 2>&1; then
-    info "Installing lazygit..."
-    LAZYGIT_VERSION=$(curl -sI https://github.com/jesseduffield/lazygit/releases/latest | grep -i location | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo "0.66.1")
-    curl -sL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_${ARCH_LAZYGIT}.tar.gz" | tar -xz -C "$BIN_DIR" lazygit
-    chmod +x "$BIN_DIR/lazygit"
-    success "lazygit v${LAZYGIT_VERSION} installed"
-else
-    success "lazygit is already installed"
-fi
-
-# 1.10 RIPGREP
-if ! command -v "$BIN_DIR/rg" >/dev/null 2>&1; then
-    info "Installing ripgrep..."
-    RG_VERSION=$(curl -sI https://github.com/BurntSushi/ripgrep/releases/latest | grep -i location | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo "15.2.0")
-    curl -sL "https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}/ripgrep-${RG_VERSION}-${ARCH_RG}.tar.gz" | tar -xz --strip-components=1 -C "$BIN_DIR" "ripgrep-${RG_VERSION}-${ARCH_RG}/rg"
-    chmod +x "$BIN_DIR/rg"
-    success "ripgrep v${RG_VERSION} installed"
-else
-    success "ripgrep is already installed"
-fi
-
-# 1.11 ZOXIDE
-if ! command -v "$BIN_DIR/zoxide" >/dev/null 2>&1; then
-    info "Installing zoxide..."
-    ZOXIDE_VERSION=$(curl -sI https://github.com/ajeetdsouza/zoxide/releases/latest | grep -i location | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo "0.10.0")
-    curl -sL "https://github.com/ajeetdsouza/zoxide/releases/download/v${ZOXIDE_VERSION}/zoxide-${ZOXIDE_VERSION}-${ARCH_ZOXIDE}.tar.gz" | tar -xz -C "$BIN_DIR" zoxide
-    chmod +x "$BIN_DIR/zoxide"
-    success "zoxide v${ZOXIDE_VERSION} installed"
-else
-    success "zoxide is already installed"
+if ! command -v fd >/dev/null 2>&1 && command -v fdfind >/dev/null 2>&1; then
+    ln -s "$(command -v fdfind)" "$BIN_DIR/fd"
 fi
 
 # -----------------------------------------------------------------------------
 # 2. Symlink Dotfiles
 # -----------------------------------------------------------------------------
+    info "Building and installing RunCat fonts (customizable with RUNCAT_BASE_FONT)..."
+    bash "$DOTFILES_DIR/tmux/.config/tmux/plugins/tmux-runcat/fonts/setup.sh"
 info "Linking dotfiles to $HOME..."
 
 link_file() {
@@ -258,11 +128,19 @@ link_file() {
             success "Already linked: $dst"
             return
         fi
-        warn "Backing up existing $dst to ${dst}.bak"
-        mv "$dst" "${dst}.bak"
+        local backup_dir
+        backup_dir=$(mktemp -d "${dst}.bak.XXXXXXXX")
+        warn "Backing up existing $dst to $backup_dir/original"
+        mv -- "$dst" "$backup_dir/original"
     fi
 
-    ln -s "$src" "$dst"
+    if ! ln -s -- "$src" "$dst"; then
+        if [[ -n ${backup_dir:-} ]]; then
+            mv -- "$backup_dir/original" "$dst"
+            rmdir -- "$backup_dir"
+        fi
+        return 1
+    fi
     success "Linked $dst -> $src"
 }
 
@@ -298,8 +176,6 @@ fi
 
 # Link Tmux configuration (~/.config/tmux)
 if [ -d "$DOTFILES_DIR/tmux/.config/tmux" ]; then
-    info "Building and installing RunCat fonts (customizable with RUNCAT_BASE_FONT)..."
-    bash "$DOTFILES_DIR/tmux/.config/tmux/plugins/tmux-runcat/fonts/setup.sh"
     link_file "$DOTFILES_DIR/tmux/.config/tmux" "$HOME/.config/tmux"
 fi
 

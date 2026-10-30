@@ -1,0 +1,4 @@
+.nvimlog
+fish/.config/fish/fish_variables
+fish/.config/fish/local.fish
+__pycache__/
