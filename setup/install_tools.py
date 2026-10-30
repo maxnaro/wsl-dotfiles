@@ -75,6 +75,19 @@ def main():
         except Exception as error:
             raise RuntimeError(f'{tool}: {error}') from error
 
+    for tool in ('sesh', 'atuin'):
+        executable = shutil.which(tool) or str(Path.home()/'.local/bin'/tool)
+        for shell in ('fish', 'bash'):
+            command = ([executable, 'completion', shell] if tool == 'sesh'
+                       else [executable, 'gen-completions', '--shell', shell])
+            output = subprocess.run(command, check=True, capture_output=True).stdout
+            directory = Path.home()/'.local/share'/('fish/vendor_completions.d' if shell == 'fish' else 'bash-completion/completions')
+            directory.mkdir(parents=True, exist_ok=True)
+            target = directory/(tool + ('.fish' if shell == 'fish' else ''))
+            with tempfile.NamedTemporaryFile(dir=directory, delete=False) as staged:
+                staged.write(output)
+            os.replace(staged.name, target)
+
 
 if __name__ == '__main__':
     main()

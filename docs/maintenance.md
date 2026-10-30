@@ -47,3 +47,41 @@ bash/.bash_aliases scripts/.scripts/auto_venv.sh`, and `fish -n` on the tracked
 Fish scripts. Tests use temporary homes and mocked downloads and do not execute
 the real full setup. Release metadata has been verified for both architectures;
 ARM64 binaries still require a real ARM64 machine for execution validation.
+
+## Workspaces, recovery, and history
+
+Setup installs pinned Sesh and Atuin binaries and generates their Bash/Fish
+completions. Resurrect and Continuum are pinned submodules; update their pointers
+explicitly rather than running a plugin-manager update.
+
+In tmux, press your prefix (`Ctrl-b` or `Ctrl-a`) followed by:
+
+| Key | Action |
+| --- | --- |
+| `g` | Pick an existing session or Zoxide directory |
+| `Ctrl-s` | Save the workspace now |
+| `Ctrl-r` | Restore the saved workspace |
+| `r` | Reload configuration |
+
+New workspaces start with one shell. Use `sesh connect /path/to/project` to start
+a first project; visiting directories builds Zoxide's project list. Escape or
+Ctrl-c cancels the picker without creating a session. The delayed help popup
+includes workspace and recovery shortcuts when enabled.
+
+Continuum saves every 15 minutes while tmux's status line is active. Recovery is
+manual and restores layouts and working directories, with process restoration
+disabled. Snapshots live in `~/.local/state/tmux/resurrect`. Running process memory
+and unsaved editor buffers are not recovered. Continuum can suspend automatic
+saving when another tmux server is running; manual save remains available.
+
+Atuin uses `Ctrl-r` in interactive Fish and Bash fallback sessions; Up-arrow keeps
+its native behavior. Selecting a command returns it for editing. Sync and update
+checks are disabled, with no account creation or automatic history import. The
+tracked configuration is linked at `~/.config/atuin/config.toml`; history remains
+in Atuin's local data directory outside the repository. To import existing
+history deliberately, run `atuin import fish` or `atuin import bash` once.
+
+Run `python3 tests/live_recovery.py` for an isolated real-tmux check, in addition
+to the unit suite. It creates and cleans up its own socket and temporary home.
+Changes to prefix-help must be committed in its repository before updating the
+parent pointer. Publish that plugin commit before sharing the parent commit.
