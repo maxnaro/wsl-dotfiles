@@ -96,6 +96,53 @@ alias l='ls -CF'
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
+# PYENV CONFIGURATION (Fast PATH shims, lazy-load completions/rehash on pyenv invocation)
+export PYENV_ROOT="$HOME/.pyenv"
+if [ -d "$PYENV_ROOT/bin" ]; then
+  export PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"
+fi
+export PATH="$HOME/.local/bin:$PATH"
+# Go bin PATH (Static path avoids slow 'go env GOPATH' subshell execution)
+export PATH="${GOPATH:-$HOME/go}/bin:$PATH"
+
+# Deduplicate PATH and retain VS Code when filtering WSL mount paths.
+_clean_path=
+IFS=: read -ra _path_entries <<< "$PATH"
+for _entry in "${_path_entries[@]}"; do
+  case $_entry in /mnt/*) [[ -z ${WSL_DISTRO_NAME:-} || $_entry == */Microsoft\ VS\ Code/bin ]] || continue ;; esac
+  [[ :$_clean_path: == *:"$_entry":* ]] || _clean_path=${_clean_path:+$_clean_path:}$_entry
+done
+export PATH=$_clean_path
+unset _clean_path _path_entries _entry
+[[ -r "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
+[[ -r "$HOME/.bashrc.local" ]] && source "$HOME/.bashrc.local"
+if [[ ${DOTFILES_NO_FISH:-0} != 1 ]] && command -v fish >/dev/null 2>&1; then
+  exec fish
+fi
+
+# NVM CONFIGURATION (Lazy-loaded on first call to nvm/node/npm/npx/pnpm/yarn)
+export NVM_DIR="$HOME/.nvm"
+_load_nvm() {
+  unset -f nvm node npm npx pnpm yarn _load_nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+}
+if [[ -s "$NVM_DIR/nvm.sh" ]]; then
+for _nvm_cmd in nvm node npm npx pnpm yarn; do
+  eval "$_nvm_cmd() { _load_nvm; \"$_nvm_cmd\" \"\$@\"; }"
+done
+unset _nvm_cmd
+fi
+
+if command -v pyenv >/dev/null 2>&1; then
+pyenv() {
+  unset -f pyenv
+  eval "$(command pyenv init -)"
+  pyenv "$@"
+}
+
+fi
+[[ -f ~/.scripts/auto_venv.sh ]] && source ~/.scripts/auto_venv.sh
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
@@ -115,41 +162,6 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
-
-# NVM CONFIGURATION (Lazy-loaded on first call to nvm/node/npm/npx/pnpm/yarn)
-export NVM_DIR="$HOME/.nvm"
-_load_nvm() {
-  unset -f nvm node npm npx pnpm yarn _load_nvm
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-}
-for _nvm_cmd in nvm node npm npx pnpm yarn; do
-  eval "$_nvm_cmd() { _load_nvm; \"$_nvm_cmd\" \"\$@\"; }"
-done
-unset _nvm_cmd
-
-# PYENV CONFIGURATION (Fast PATH shims, lazy-load completions/rehash on pyenv invocation)
-export PYENV_ROOT="$HOME/.pyenv"
-if [ -d "$PYENV_ROOT/bin" ]; then
-  export PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"
-fi
-pyenv() {
-  unset -f pyenv
-  eval "$(command pyenv init -)"
-  pyenv "$@"
-}
-
-# Added by Antigravity CLI installer
-export PATH="/home/max/.local/bin:$PATH"
-# Filter slow /mnt/c Windows paths from PATH to prevent tab-completion freezes in WSL,
-# while retaining access to VS Code CLI
-_clean_path=$(echo "$PATH" | tr ':' '\n' | grep -v '^/mnt/c' | paste -sd: -)
-export PATH="${_clean_path}:/mnt/c/Users/MaxNarongchai/AppData/Local/Programs/Microsoft VS Code/bin"
-unset _clean_path
-
-# Go bin PATH (Static path avoids slow 'go env GOPATH' subshell execution)
-export PATH="${GOPATH:-$HOME/go}/bin:$PATH"
-[[ -f ~/.scripts/auto_venv.sh ]] && source ~/.scripts/auto_venv.sh
 
 # -----------------------------------------------------------------------------
 # CachyOS Terminal Enhancements (FZF, Manpager, Prompt, Fastfetch)
@@ -206,9 +218,3 @@ _cachyos_git_branch() {
   fi
 }
 PS1='\w$(_cachyos_git_branch)\n❯ '
-
-# Automatically launch fish for interactive sessions (retains bash for system scripts)
-if [[ $- == *i* ]] && [ -z "$FISH_VERSION" ] && command -v fish >/dev/null 2>&1; then
-  exec fish
-fi
-. "$HOME/.cargo/env"

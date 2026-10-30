@@ -1,5 +1,6 @@
 # ~/.config/fish/functions/fish_prompt.fish - Minimal CachyOS Pure-style prompt
 function fish_prompt
+    set -l command_status $status
     # First line: Current directory (in cyan) and git branch (in magenta)
     set -l cyan (set_color cyan)
     set -l magenta (set_color magenta)
@@ -19,7 +20,7 @@ function fish_prompt
     echo -s "$cyan" (prompt_pwd -d 0) "$normal" "$git_info"
 
     # Second line: Symbol ❯ (cyan or red on error)
-    if test $status -eq 0
+    if test $command_status -eq 0
         echo -n -s (set_color cyan) "❯ " (set_color normal)
     else
         echo -n -s (set_color red) "❯ " (set_color normal)

@@ -1,17 +1,30 @@
 # ~/.config/fish/config.fish - CachyOS-style Fish configuration
 
 # Clean Windows /mnt/c paths from PATH to keep tab completion instant in WSL
-set -l clean_path (string split : $PATH | string match -v -r '^/mnt/c')
-set -gx PATH $clean_path /mnt/c/Users/MaxNarongchai/AppData/Local/Programs/Microsoft\ VS\ Code/bin
+if set -q WSL_DISTRO_NAME
+    set -l clean_path
+    for entry in $PATH
+        if string match -q '/mnt/*' -- "$entry"; and not string match -q '*/Microsoft VS Code/bin' -- "$entry"
+            continue
+        end
+        contains -- "$entry" $clean_path; or set -a clean_path "$entry"
+    end
+    set -gx PATH $clean_path
+end
 
 # User bin & Go PATH
-fish_add_path ~/.local/bin
-fish_add_path (test -n "$GOPATH"; and echo "$GOPATH/bin"; or echo "$HOME/go/bin")
+fish_add_path --path ~/.local/bin
+fish_add_path --path (test -n "$GOPATH"; and echo "$GOPATH/bin"; or echo "$HOME/go/bin")
 
 # Pyenv
 if test -d "$HOME/.pyenv/bin"
-    fish_add_path "$HOME/.pyenv/shims" "$HOME/.pyenv/bin"
+    fish_add_path --path "$HOME/.pyenv/shims" "$HOME/.pyenv/bin"
 end
+
+if test -r "$HOME/.config/fish/local.fish"
+    source "$HOME/.config/fish/local.fish"
+end
+status is-interactive; or return
 
 # Format man pages with bat (CachyOS style)
 if type -q bat

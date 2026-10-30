@@ -4,10 +4,11 @@
 auto_venv_cd() {
   builtin cd "$@" || return
 
+  local venv_dir
   # Check for common venv names
   for venv_dir in .venv venv env; do
     if [[ -f "$venv_dir/bin/activate" ]]; then
-      if [[ "$VIRTUAL_ENV" != "$(pwd)/$venv_dir" ]]; then
+      if [[ "${VIRTUAL_ENV:-}" != "$(pwd)/$venv_dir" ]]; then
         source "$venv_dir/bin/activate"
       fi
       return
@@ -15,9 +16,9 @@ auto_venv_cd() {
   done
 
   # Auto-deactivate if you leave the project tree
-  if [[ -n "$VIRTUAL_ENV" ]]; then
-    if [[ "$PWD"/ != "$(dirname "$VIRTUAL_ENV")"/* ]]; then
-      deactivate
+  if [[ -n "${VIRTUAL_ENV:-}" ]]; then
+    if [[ "$PWD"/ != "$(dirname "${VIRTUAL_ENV:-}")"/* ]]; then
+      if declare -F deactivate >/dev/null; then deactivate; fi
     fi
   fi
 }

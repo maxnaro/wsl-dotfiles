@@ -1,3 +1,5 @@
+status is-interactive; or return
+
 # Auto-activate Python venvs on directory change in Fish
 function _auto_venv --on-variable PWD --description "Automatically activate/deactivate Python venvs on cd"
     # Check for common venv folders in current directory
