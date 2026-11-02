@@ -115,20 +115,28 @@ in this repository.
 
 The cat lives in the standalone Rust `tmux-runcat` plugin, included as a
 submodule at `tmux/.config/tmux/plugins/tmux-runcat`. It runs faster with typing
-without a speed cap and sleeps after eight idle seconds. The parent config
-places it before the device icon, device name, and clock. It selects the
-Pet Cats skin: stretching on wake, walking/running with typing, varied pause
-gestures, and lying down before sleeping with subtle breathing. The cat uses
-the status foreground (cyan) and the four-cell `xlarge` preset. The eight-second
-idle delay allows about two seconds of movement, easing into a lingering slow
-walk, then a gesture of up to three seconds before 0.6 seconds of lying down.
+without a speed cap and sleeps within eight idle seconds. The parent config
+lets it roam through the free space between the window list and right status,
+turning around at the edges and resting where it stops. It selects the
+Pet Cats skin with an 18% chance per running second to start an OIIA-style
+spin. Set `@runcat-spin-chance 0` to disable spinning, or `@runcat-roam off`
+and add `#{@runcat-frame}` to a status segment for a stationary cat.
+The cat uses the four-cell `xlarge` preset and stays cyan in all actions and
+both directions. Change `@runcat-color` to a literal tmux colour, or `inherit`
+to use the status foreground. Roaming and gait share a smoothed cadence;
+changing between walk and run preserves the stride, and wide terminals do
+not increase travel speed.
 
-Animation frames and key counts use hidden tmux session variables to avoid
-full client redraws. The status format uses `#{RUNCAT_FRAME}`. Synchronized
-rendering is enabled for `xterm-256color` clients to reduce flicker; this requires
-a terminal with DECSET 2026 support, such as Windows Terminal 1.23.20211.0 or
-newer. Detach and reattach existing clients after reloading the config to apply
-that terminal feature.
+After typing pauses, the cat eases into a slow walk for up to two seconds.
+Idle/sitting lasts 0.5 seconds, meowing one second, and grooming/scratching
+three seconds, followed by 0.6 seconds of lying down. It then sleeps rather
+than holding a short gesture until the eight-second maximum.
+
+The plugin measures available space for each client and adapts to terminal
+resizes and window names. Keep the stationary cat placeholder out of the status
+format while roaming to avoid drawing it twice. Synchronized rendering is
+enabled for `xterm-256color` clients to reduce flicker. Detach and reattach
+existing clients after reloading the config to apply that terminal feature.
 
 Use `set -g @runcat-size small`, `medium`, `large`, or `xlarge` in `tmux.conf`
 to select one-, two-, three-, or four-cell cats. The plugin defaults to `medium`;
@@ -138,7 +146,7 @@ Use `set -g @runcat-skin classic` to switch to the original silhouette.
 `./setup.sh` builds the executable and fonts, installs fonts in the terminal's
 host OS, and configures Windows Terminal automatically on WSL. All font build
 inputs are pinned and bundled; the Rust plugin has no third-party dependencies.
-On Linux, select `JetBrainsMono RunCat v5` after setup. See the
+On Linux, select `JetBrainsMono RunCat v7` after setup. See the
 [plugin README](tmux/.config/tmux/plugins/tmux-runcat/README.md) for options,
 font setup, tests, and TPM installation.
 
