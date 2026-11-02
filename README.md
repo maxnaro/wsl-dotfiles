@@ -121,7 +121,7 @@ Pet Cats skin: stretching on wake, walking/running with typing, varied pause
 gestures, and lying down before sleeping with subtle breathing. The cat uses
 the status foreground (cyan) and the four-cell `xlarge` preset. The eight-second
 idle delay allows about two seconds of movement, easing into a lingering slow
-walk, then 5.4 seconds of a pause gesture before 0.6 seconds of lying down.
+walk, then a gesture of up to three seconds before 0.6 seconds of lying down.
 
 Animation frames and key counts use hidden tmux session variables to avoid
 full client redraws. The status format uses `#{RUNCAT_FRAME}`. Synchronized
@@ -193,3 +193,9 @@ Ctrl-`]` dismisses them; Escape retains its normal Insert-mode behavior.
 
 The toggle stops Copilot across buffers without persisting its state. Chat,
 assistant terminals, and next-edit suggestions are not enabled.
+
+Pet Cats pause gestures last up to three seconds for grooming and scratching,
+one second for meowing, and half a second for standing idle or sitting.
+The idle setting is an upper limit: the cat lies down and sleeps sooner when
+its gesture finishes. With an eight-second limit, sleep begins after about
+5.6, 3.6, or 3.1 seconds respectively.
