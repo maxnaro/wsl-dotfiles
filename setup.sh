@@ -166,6 +166,9 @@ if [ -f "$DOTFILES_DIR/scripts/.scripts/auto_venv.sh" ]; then
     link_file "$DOTFILES_DIR/scripts/.scripts/auto_venv.sh" "$HOME/.scripts/auto_venv.sh"
 fi
 
+# Link LazyGit configuration
+link_file "$DOTFILES_DIR/lazygit/.config/lazygit/config.yml" "$HOME/.config/lazygit/config.yml"
+
 # Link Neovim configuration (~/.config/nvim)
 if [ -d "$DOTFILES_DIR/nvim/.config/nvim" ]; then
     link_file "$DOTFILES_DIR/nvim/.config/nvim" "$HOME/.config/nvim"
@@ -185,7 +188,7 @@ fi
 # 3. Optional: GNU Stow support
 # -----------------------------------------------------------------------------
 if command -v stow >/dev/null 2>&1; then
-    info "GNU Stow detected. You can also run 'stow bash', 'stow git', 'stow scripts', 'stow nvim', 'stow fish', or 'stow tmux' inside $DOTFILES_DIR"
+    info "GNU Stow detected. You can also run 'stow bash', 'stow git', 'stow scripts', 'stow nvim', 'stow fish', 'stow lazygit', or 'stow tmux' inside $DOTFILES_DIR"
 fi
 
 echo ""

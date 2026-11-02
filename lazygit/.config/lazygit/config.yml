@@ -1,0 +1,10 @@
+# Escape cancels dialogs first, then returns to the editor from the main view.
+quitOnTopLevelReturn: true
+gui:
+  theme:
+    activeBorderColor: ['#7EA69F', bold]
+    inactiveBorderColor: ['#5C483C']
+    searchingActiveBorderColor: ['#BC8CBC', bold]
+    defaultFgColor: ['#D3C6AA']
+    optionsTextColor: ['#7EA69F']
+    selectedLineBgColor: [default]

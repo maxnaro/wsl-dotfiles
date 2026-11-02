@@ -80,6 +80,7 @@ cd ~/dotfiles
 stow -R bash
 stow -R fish
 stow -R git
+stow -R lazygit
 stow -R scripts
 stow -R nvim
 stow -R tmux
@@ -114,12 +115,13 @@ in this repository.
 
 The cat lives in the standalone Rust `tmux-runcat` plugin, included as a
 submodule at `tmux/.config/tmux/plugins/tmux-runcat`. It runs faster with typing
-without a speed cap and sleeps after three idle seconds. The parent config
+without a speed cap and sleeps after eight idle seconds. The parent config
 places it before the device icon, device name, and clock. It selects the
 Pet Cats skin: stretching on wake, walking/running with typing, varied pause
 gestures, and lying down before sleeping with subtle breathing. The cat uses
-the status foreground (cyan) and the four-cell `xlarge` preset. The three-second
-idle delay gives pause gestures about 1.3 seconds to play before lying down.
+the status foreground (cyan) and the four-cell `xlarge` preset. The eight-second
+idle delay allows about two seconds of movement, easing into a lingering slow
+walk, then 5.4 seconds of a pause gesture before 0.6 seconds of lying down.
 
 Animation frames and key counts use hidden tmux session variables to avoid
 full client redraws. The status format uses `#{RUNCAT_FRAME}`. Synchronized
@@ -163,3 +165,31 @@ tmux source-file ~/.config/tmux/tmux.conf
 
 Commit plugin changes in its repository, then commit its updated submodule
 pointer in this repository.
+
+### Editor and LazyGit styling
+
+LazyVim uses a transparent, compact status line with file changes, Git details,
+diagnostics, and cursor position. Its accents and LazyGit borders match the
+terminal's Chocolatier palette. In LazyGit, Escape dismisses dialogs and subviews,
+then quits from the top level; `q` also quits. Existing leader shortcuts remain.
+
+Setup links `lazygit/.config/lazygit/config.yml` to `~/.config/lazygit/config.yml`,
+backing up an existing file. For an existing installation, use `stow -R lazygit`
+after moving any existing LazyGit config aside. Restart Neovim and LazyGit to
+load their changes; reload tmux with `tmux source-file ~/.config/tmux/tmux.conf`.
+
+### Neovim AI autocomplete
+
+AI autocomplete starts off in every Neovim session. Press Space `au` to toggle
+Copilot across buffers. Enable it first, then run `:Copilot auth` to sign in.
+Explicit `:Copilot` commands also load the plugin. Lazy installs the plugin;
+its native language server downloads on first use and requires Copilot access.
+
+Tab accepts the visible regular completion first, advances snippet placeholders,
+then accepts visible AI ghost text, otherwise inserting normal Tab. Shift-Tab
+selects the previous completion or snippet placeholder. AI text hides while the
+regular completion menu is open. Alt-`]` / Alt-`[` cycle AI suggestions and
+Ctrl-`]` dismisses them; Escape retains its normal Insert-mode behavior.
+
+The toggle stops Copilot across buffers without persisting its state. Chat,
+assistant terminals, and next-edit suggestions are not enabled.
