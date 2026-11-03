@@ -40,7 +40,7 @@ dotfiles/
 Clone this repository and run the setup script. It installs CLI tools into
 `~/.local/bin` and Rust through rustup (normally `~/.cargo` and `~/.rustup`),
 without sudo. Git, curl, Python 3.11+, tmux, tar with xz support, sha256sum,
-and a system C linker (`cc`) must already be installed;
+Emacs 29.1+, and a system C linker (`cc`) must already be installed;
 on Debian/Ubuntu, `build-essential` provides the C build tools.
 
 ```bash
@@ -235,3 +235,26 @@ and terminal modes. Navigation leaves input/selection mode; picker-local keys
 remain available, including Alt-h to toggle hidden files. Alt-j/k no longer move
 lines. The old Live Share aliases and `Space l` plugin-manager binding are removed.
 LazyGit uses Snacks; the former plugin's `:LazyGit*` commands are retired.
+
+### Emacs and Doom
+
+Install Emacs through your system package manager first (for example,
+`sudo apt install emacs-nox` on Ubuntu for terminal use). Setup requires
+Emacs 29.1 or newer and does not install system packages.
+
+Personal Doom configuration lives in `doom/.config/doom/`. Setup links it to
+`~/.config/doom`, backing up existing configuration, then bootstraps Doom in
+`~/.config/emacs`. Fresh installations use core revision
+`59cdaa32ae933469bb6a1fb3cadee8a988c15968` and its pinned submodules.
+Existing Doom installations retain their revision and run `doom sync`.
+Unrelated Emacs configurations must be moved aside before bootstrap.
+Framework code, installed packages, and caches remain outside this repository.
+
+For manual linking, move any existing personal configuration aside and run
+`stow -R doom`. With Emacs installed, run `bash setup/install_doom.sh` to
+bootstrap Doom without running the full setup. Bash and Fish expose `doom`
+on PATH after restarting the shell.
+
+Run `doom sync` after changing `init.el` or `packages.el`; restart Emacs after
+configuration changes. Use `doom doctor` to inspect missing optional tools
+and `doom upgrade` when you deliberately want to update Doom.

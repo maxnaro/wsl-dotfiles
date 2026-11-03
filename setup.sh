@@ -29,10 +29,14 @@ error() {
 }
 
 # Validate prerequisites before creating installation directories.
-for prerequisite in git curl python3 tar sha256sum cc tmux; do
+for prerequisite in git curl python3 tar sha256sum cc tmux emacs; do
     command -v "$prerequisite" >/dev/null 2>&1 || { error "Missing prerequisite: $prerequisite"; exit 1; }
 done
 [[ $(uname -s) == Linux ]] || { error "Setup supports Linux and WSL only"; exit 1; }
+emacs --batch -Q --eval '(kill-emacs (if (version< emacs-version "29.1") 1 0))' || {
+    error "Doom requires Emacs 29.1 or newer; install it with your system package manager."
+    exit 1
+}
 SETUP_STAGE=$(mktemp -d)
 trap 'rm -rf -- "$SETUP_STAGE"' EXIT
 trap 'error "Setup failed at line $LINENO; rerun after resolving the error"' ERR
@@ -174,6 +178,10 @@ if [ -d "$DOTFILES_DIR/nvim/.config/nvim" ]; then
     link_file "$DOTFILES_DIR/nvim/.config/nvim" "$HOME/.config/nvim"
 fi
 
+# Link personal Doom configuration before installing packages.
+link_file "$DOTFILES_DIR/doom/.config/doom" "$HOME/.config/doom"
+bash "$DOTFILES_DIR/setup/install_doom.sh"
+
 # Link Fish configuration (~/.config/fish)
 if [ -d "$DOTFILES_DIR/fish/.config/fish" ]; then
     link_file "$DOTFILES_DIR/fish/.config/fish" "$HOME/.config/fish"
@@ -188,7 +196,7 @@ fi
 # 3. Optional: GNU Stow support
 # -----------------------------------------------------------------------------
 if command -v stow >/dev/null 2>&1; then
-    info "GNU Stow detected. You can also run 'stow bash', 'stow git', 'stow scripts', 'stow nvim', 'stow fish', 'stow lazygit', or 'stow tmux' inside $DOTFILES_DIR"
+    info "GNU Stow detected. You can also run 'stow bash', 'stow git', 'stow scripts', 'stow nvim', 'stow fish', 'stow lazygit', 'stow doom', or 'stow tmux' inside $DOTFILES_DIR"
 fi
 
 echo ""
