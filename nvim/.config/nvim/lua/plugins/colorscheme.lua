@@ -22,6 +22,8 @@ return {
           WinSeparator = { fg = p.muted, bg = "NONE" },
           Pmenu = { fg = p.fg, bg = p.surface },
           PmenuSel = { fg = p.bright, bg = p.selection },
+          -- Hidden paths must remain readable over the explorer's selected row.
+          SnacksPickerPathHidden = { fg = p.fg },
           BlinkCmpMenuBorder = { fg = p.cyan, bg = p.surface },
           BlinkCmpDocBorder = { fg = p.cyan, bg = "NONE" },
           BlinkCmpSignatureHelpBorder = { fg = p.cyan, bg = "NONE" },
