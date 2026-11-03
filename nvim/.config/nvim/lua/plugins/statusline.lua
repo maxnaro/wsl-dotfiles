@@ -2,11 +2,11 @@ return {
   {
     "nvim-lualine/lualine.nvim",
     opts = function(_, opts)
-      local quiet = { fg = "#D3C6AA", bg = "NONE" }
-      local accent = { fg = "#7EA69F", bg = "NONE" }
+      local p = require("config.palette")
+      local quiet = { fg = p.fg, bg = "NONE" }
       local theme = {}
       for _, mode in ipairs({ "normal", "insert", "visual", "replace", "command", "terminal", "inactive" }) do
-        theme[mode] = { a = accent, b = quiet, c = quiet }
+        theme[mode] = { a = { fg = ({ insert = p.green, visual = p.purple, replace = p.red, command = p.yellow, terminal = p.blue, inactive = p.muted })[mode] or p.cyan, bg = "NONE" }, b = quiet, c = quiet }
       end
       opts.options.theme = theme
       opts.options.section_separators = ""
@@ -14,9 +14,11 @@ return {
       opts.options.icons_enabled = false
       opts.sections = {
         lualine_a = { { "mode", fmt = function(mode) return mode:sub(1, 1) end } },
-        lualine_b = { { "branch", color = { fg = "#BC8CBC" } } },
+        lualine_b = { { "branch", color = { fg = p.purple } } },
         lualine_c = { { "filename", path = 1 } },
         lualine_x = {
+          { function() return "REC @" .. vim.fn.reg_recording() end,
+            cond = function() return vim.fn.reg_recording() ~= "" end, color = { fg = p.red } },
           { "diff", source = function()
             local status = vim.b.gitsigns_status_dict
             if status then

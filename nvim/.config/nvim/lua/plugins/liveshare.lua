@@ -4,8 +4,8 @@ return {
     optional = true,
     opts = {
       spec = {
-        { "<leader>l", group = "live share" },
-        { "<leader>cl", group = "live share" },
+        { "<leader>l", group = "tools" },
+        { "<leader>cL", group = "live share" },
       },
     },
   },
@@ -39,14 +39,10 @@ return {
       })
     end,
     keys = {
-      { "<leader>lh", "<cmd>LiveShareHostStart<CR>", desc = "Host Live Share" },
-      { "<leader>lj", ":LiveShareJoin ", desc = "Join Live Share" },
-      { "<leader>ls", "<cmd>LiveShareStop<CR>", desc = "Stop Live Share" },
-      { "<leader>lw", "<cmd>LiveShareWorkspace<CR>", desc = "Browse shared workspace" },
-      { "<leader>clh", "<cmd>LiveShareHostStart<CR>", desc = "Host Live Share" },
-      { "<leader>clj", ":LiveShareJoin ", desc = "Join Live Share" },
-      { "<leader>cls", "<cmd>LiveShareStop<CR>", desc = "Stop Live Share" },
-      { "<leader>clw", "<cmd>LiveShareWorkspace<CR>", desc = "Browse shared workspace" },
+      { "<leader>cLh", "<cmd>LiveShareHostStart<CR>", desc = "Host Live Share" },
+      { "<leader>cLj", ":LiveShareJoin ", desc = "Join Live Share" },
+      { "<leader>cLs", "<cmd>LiveShareStop<CR>", desc = "Stop Live Share" },
+      { "<leader>cLw", "<cmd>LiveShareWorkspace<CR>", desc = "Browse shared workspace" },
     },
   },
 }

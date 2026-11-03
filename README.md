@@ -177,8 +177,8 @@ pointer in this repository.
 ### Editor and LazyGit styling
 
 LazyVim uses a transparent, compact status line with file changes, Git details,
-diagnostics, and cursor position. Its accents and LazyGit borders match the
-terminal's Chocolatier palette. In LazyGit, Escape dismisses dialogs and subviews,
+diagnostics, and cursor position. Its text, syntax accents, selection surfaces, and LazyGit borders match the
+terminal's Chocolatier palette. Buffer tabs are disabled; native tab pages remain available. In LazyGit, Escape dismisses dialogs and subviews,
 then quits from the top level; `q` also quits. Existing leader shortcuts remain.
 
 Setup links `lazygit/.config/lazygit/config.yml` to `~/.config/lazygit/config.yml`,
@@ -207,3 +207,31 @@ one second for meowing, and half a second for standing idle or sitting.
 The idle setting is an upper limit: the cat lies down and sleeps sooner when
 its gesture finishes. With an eight-second limit, sleep begins after about
 5.6, 3.6, or 3.1 seconds respectively.
+
+### Neovim navigation and tools
+
+Space is the leader key. Search keeps its existing layout and diagnostics and
+inlay hints retain their detail. The compact status line colors the mode letter
+and shows `REC @register` while recording a macro.
+
+| Shortcut | Action |
+| --- | --- |
+| `H` / `L`, `[b` / `]b` | Previous / next buffer |
+| `Space ,` | Buffer picker |
+| `Space bb` | Alternate buffer |
+| `Space gg`, `Space lg` | LazyGit at the project Git root |
+| `Space gG` | LazyGit at Neovim's working directory |
+| `Space gf` | Current-file Git history |
+| `Space lz` | Plugin manager |
+| `Space cl` | LSP info |
+| `Space cLh/j/s/w` | Live Share host / join / stop / workspace |
+| `Space qs`, `Space qS` | Restore project session / select session |
+| `Space sr` | Search and replace |
+| `Space gh` | Git hunk actions (Which-Key menu) |
+| `Space wm`, `Space uz` | Zoom window / zen mode |
+
+Alt-h/j/k/l navigate editor splits and tmux panes from Normal, Insert, Visual,
+and terminal modes. Navigation leaves input/selection mode; picker-local keys
+remain available, including Alt-h to toggle hidden files. Alt-j/k no longer move
+lines. The old Live Share aliases and `Space l` plugin-manager binding are removed.
+LazyGit uses Snacks; the former plugin's `:LazyGit*` commands are retired.
