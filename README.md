@@ -194,7 +194,8 @@ Explicit `:Copilot` commands also load the plugin. Lazy installs the plugin;
 its native language server downloads on first use and requires Copilot access.
 
 Tab accepts the visible regular completion first, advances snippet placeholders,
-then accepts visible AI ghost text, otherwise inserting normal Tab. Shift-Tab
+then accepts visible AI ghost text, or opens completions after a typed word.
+Otherwise it inserts normal Tab. Shift-Tab
 selects the previous completion or snippet placeholder. AI text hides while the
 regular completion menu is open. Alt-`]` / Alt-`[` cycle AI suggestions and
 Ctrl-`]` dismisses them; Escape retains its normal Insert-mode behavior.
