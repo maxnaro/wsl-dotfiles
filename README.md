@@ -240,7 +240,7 @@ LazyGit uses Snacks; the former plugin's `:LazyGit*` commands are retired.
 
 Doom uses a local Chocolatier theme matching Neovim and the terminal, with a
 ViMax-style EMax block-letter banner. Terminal backgrounds inherit the terminal's
-background; graphical frames use warm brown. The existing modeline layout and
+background; graphical frames use background-only transparency. The existing modeline layout and
 dashboard actions are preserved. Restart Emacs after updating the configuration;
 `M-x doom/reload-theme` reloads theme edits. No additional packages are needed.
 
