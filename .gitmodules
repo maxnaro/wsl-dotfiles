@@ -10,3 +10,6 @@
 [submodule "tmux/.config/tmux/plugins/tmux-continuum"]
 	path = tmux/.config/tmux/plugins/tmux-continuum
 	url = https://github.com/tmux-plugins/tmux-continuum.git
+[submodule "nvim/.config/nvim"]
+	path = nvim/.config/nvim
+	url = git@github.com:maxnaro/nvim-config.git

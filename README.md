@@ -21,7 +21,7 @@ dotfiles/
 │   └── .gitconfig
 ├── nvim/
 │   └── .config/
-│       └── nvim/
+│       └── nvim/                         # Git submodule (maxnaro/nvim-config)
 ├── tmux/
 │   └── .config/
 │       └── tmux/
@@ -173,6 +173,25 @@ tmux source-file ~/.config/tmux/tmux.conf
 
 Commit plugin changes in its repository, then commit its updated submodule
 pointer in this repository.
+
+### Neovim configuration repository
+
+The Neovim configuration lives in the public
+[maxnaro/nvim-config](https://github.com/maxnaro/nvim-config) repository,
+included as a Git submodule at `nvim/.config/nvim`. Its Neovim-specific history
+is preserved there. See its [README](nvim/.config/nvim/README.md) for standalone
+installation and configuration details.
+
+The setup script and `stow -R nvim` use the same paths as before. After pulling
+updates to this repository, initialize or update the pinned configuration:
+
+```bash
+git submodule update --init --recursive
+```
+
+To change the configuration, commit and push inside `nvim/.config/nvim` first,
+then commit the updated submodule pointer in this repository. Submodule updates
+normally check out a detached HEAD; switch to `main` before making changes.
 
 ### Editor and LazyGit styling
 
