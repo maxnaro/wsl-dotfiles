@@ -13,3 +13,6 @@
 [submodule "nvim/.config/nvim"]
 	path = nvim/.config/nvim
 	url = git@github.com:maxnaro/nvim-config.git
+[submodule "pi-workflow"]
+	path = pi-workflow
+	url = git@github.com:maxnaro/pi-workflow.git
