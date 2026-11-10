@@ -27,6 +27,15 @@ if test -r "$HOME/.config/fish/local.fish"
 end
 status is-interactive; or return
 
+# Enter the existing tmux server, or start one and restore its saved layout.
+if test "$DOTFILES_NO_TMUX" != 1; and test -z "$TMUX"; and isatty stdin; and isatty stdout; and type -q tmux
+    if tmux has-session 2>/dev/null
+        tmux attach-session
+    else
+        tmux new-session
+    end
+end
+
 # Format man pages with bat (CachyOS style)
 if type -q bat
     set -gx MANROFFOPT "-c"

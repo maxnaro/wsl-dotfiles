@@ -121,6 +121,15 @@ if [[ ${DOTFILES_NO_FISH:-0} != 1 ]] && command -v fish >/dev/null 2>&1; then
   exec fish
 fi
 
+# Enter the existing tmux server, or start one and restore its saved layout.
+if [[ ${DOTFILES_NO_TMUX:-0} != 1 && -z ${TMUX:-} && -t 0 && -t 1 ]] && command -v tmux >/dev/null 2>&1; then
+  if tmux has-session 2>/dev/null; then
+    tmux attach-session
+  else
+    tmux new-session
+  fi
+fi
+
 # NVM CONFIGURATION (Lazy-loaded on first call to nvm/node/npm/npx/pnpm/yarn)
 export NVM_DIR="$HOME/.nvm"
 _load_nvm() {

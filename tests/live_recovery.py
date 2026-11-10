@@ -19,7 +19,7 @@ with tempfile.TemporaryDirectory(prefix='dotfiles-recovery-') as temporary:
         tmux('source-file', str(ROOT/'tmux/.config/tmux/tmux.conf'))
         # This test uses a private socket and home; no live user server is reconfigured.
         tmux('split-window', '-h', '-c', temporary, '/bin/sleep 120')
-        assert tmux('show-option', '-gqv', '@continuum-restore') == 'off'
+        assert tmux('show-option', '-gqv', '@continuum-restore') == 'on'
         assert tmux('show-option', '-gqv', '@resurrect-processes') == 'false'
         assert tmux('show-option', '-gqv', '@continuum-save-interval') == '15'
         assert tmux('show-option', '-gqv', '@prefix-help-save-key') == 'C-s'

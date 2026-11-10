@@ -86,6 +86,17 @@ stow -R nvim
 stow -R tmux
 ```
 
+### Tmux startup and recovery
+
+Interactive Bash and Fish terminals automatically attach to an existing tmux
+server or start a new one. On a new server, tmux-continuum restores the last
+saved layout when available; it saves every 15 minutes. Continuum skips automatic
+restore when another tmux server is running, and restoration takes place shortly
+after startup. Pane processes are not restarted. Detaching returns to the shell. Set `DOTFILES_NO_TMUX=1` in the
+environment (or in `~/.bashrc.local` / `~/.config/fish/local.fish`) to skip
+automatic entry. Existing tmux panes and noninteractive shells do not launch
+another server. Save and restore manually with prefix `Ctrl-s` and `Ctrl-r`.
+
 ### Tmux prefix help
 
 The floating shortcut popup lives in the standalone `tmux-prefix-help`
