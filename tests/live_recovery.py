@@ -32,9 +32,10 @@ with tempfile.TemporaryDirectory(prefix='dotfiles-recovery-') as temporary:
         assert len(tmux('list-panes', '-t', 'project', '-F', '#{pane_current_path}').splitlines()) == 2
         tmux('source-file', str(ROOT/'tmux/.config/tmux/tmux.conf'))
         status = tmux('show-option', '-gqv', 'status-right')
-        assert '#{RUNCAT_FRAME}' in status
+        # Roaming runcat no longer injects a frame or watcher into status-right.
+        # Continuum may suppress its hook if another tmux server is running.
+        assert '#h' in status
         assert status.count('continuum_save.sh') <= 1
-        assert status.count(' watch ') == 1
         print('Recovery passed: shortcuts, save, restore, layout-only policy, reload, status triggers')
     finally:
         subprocess.run(['tmux', '-S', socket, 'kill-server'], env=env, capture_output=True)
