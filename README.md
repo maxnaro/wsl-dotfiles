@@ -315,10 +315,13 @@ Terminal, tmux, and open Neovim instances update live. Claude Code uses the
 generated `~/.claude/themes/dotfiles.json` (`"theme": "custom:dotfiles"`, set by
 `themes/install.sh` when the theme was unset or `auto`), which running sessions
 reload on change; sessions started before that folder existed need one restart.
-Codex follows the terminal palette live and its `[tui] theme` is set to
+Codex’s prompt can retain its startup colors; live prompt recoloring remains an upstream limitation.
+Its syntax-highlighting `[tui] theme` is set to
 `gruvbox-light` in light mode and removed in dark mode (Codex default), which applies to new or
-resumed sessions. Reopen active LazyGit,
-history searches, pickers, and existing embedded terminals if their colors persist.
+resumed sessions. LazyGit inside Neovim receives an updated RGB theme on each switch;
+hide/show its popup or re-enter terminal input mode to reload without restarting its process.
+Outer-window focus alone may not reach the embedded terminal. Reopen standalone LazyGit,
+history searches, pickers, and other embedded terminals if their colors persist.
 Shell prompts, Fish syntax, fzf, bat previews/man pages, eza, and Atuin use the
 terminal's ANSI palette. Windows desktop components remain independent.
 
