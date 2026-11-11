@@ -70,6 +70,16 @@ class Theme(unittest.TestCase):
         loader.exec_module(command)
         return command
 
+    def test_tmux_theme_preserves_plugin_status_hooks(self):
+        command = self.load()
+        palette = json.loads((ROOT / 'themes/chocolatier.json').read_text())
+        for colors in palette.values():
+            lines = command.tmux_style(colors).splitlines()
+            base = next(line for line in lines if line.startswith('set -g @dotfiles-status-right '))
+            self.assertIn(colors['purple'], base)
+            self.assertIn('#h', base)
+            self.assertFalse(any(line.startswith('set -g status-right ') for line in lines))
+
     def test_claude_and_codex_follow_mode(self):
         command = self.load()
         palette = json.loads((ROOT / 'themes/chocolatier.json').read_text())

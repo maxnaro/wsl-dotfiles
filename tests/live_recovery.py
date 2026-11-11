@@ -34,7 +34,8 @@ with tempfile.TemporaryDirectory(prefix='dotfiles-recovery-') as temporary:
         status = tmux('show-option', '-gqv', 'status-right')
         # Roaming runcat no longer injects a frame or watcher into status-right.
         # Continuum may suppress its hook if another tmux server is running.
-        assert '#h' in status
+        assert '#{E:@dotfiles-status-right}' in status
+        assert '#h' in tmux('show-option', '-gqv', '@dotfiles-status-right')
         assert status.count('continuum_save.sh') <= 1
         print('Recovery passed: shortcuts, save, restore, layout-only policy, reload, status triggers')
     finally:
