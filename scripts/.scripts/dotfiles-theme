@@ -9,6 +9,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 import tomllib
 import plistlib
 import shutil
@@ -163,7 +164,7 @@ def codex_config(text, mode):
 def apps(mode, p):
     """Point Claude Code and Codex at the active palette when they are installed."""
     if os.environ.get('DOTFILES_THEME_NO_APPS') == '1':
-        return
+        return False
     claude = Path(os.environ.get('CLAUDE_CONFIG_DIR', Path.home() / '.claude'))
     if claude.is_dir():
         settings_path = claude / 'settings.json'
@@ -184,11 +185,51 @@ def apps(mode, p):
             atomic(codex / 'themes/dotfiles-kimbie-light.tmTheme', codex_theme(p))
         if updated != text:
             atomic(config.resolve(), updated)
-        print('Warning: Codex configuration updated; running sessions may need reopening or resuming to refresh colors.', file=sys.stderr)
+        return True
+    return False
+
+
+def refresh_tmux_colours(terminals):
+    """Ask outer terminals for fresh defaults; tmux owns reading their replies."""
+    pending = dict(terminals)
+    started = time.monotonic()
+    # Windows Terminal reloads settings asynchronously. Repeat bounded queries
+    # without consuming input or mistaking a successful write for a verified reply.
+    for offset in (0, 0.25, 1, 2):
+        if not pending:
+            break
+        delay = started + offset - time.monotonic()
+        if delay > 0:
+            time.sleep(delay)
+        for terminal in sorted(pending):
+            try:
+                fd = os.open(terminal, os.O_WRONLY | os.O_NOCTTY | os.O_NONBLOCK)
+                try:
+                    if not os.isatty(fd):
+                        raise OSError('client terminal is no longer a TTY')
+                    # A detached client's TTY may now belong to its parent shell.
+                    # Query process metadata: tcgetpgrp rejects other sessions' TTYs.
+                    owner = subprocess.run(['ps', '-p', str(pending[terminal]), '-o', 'pgid=,tpgid='],
+                                           capture_output=True, text=True, timeout=1)
+                    groups = owner.stdout.split()
+                    if (owner.returncode or len(groups) != 2 or not groups[0].isdecimal()
+                            or int(groups[0]) <= 0 or groups[0] != groups[1]):
+                        raise OSError('tmux client no longer owns terminal')
+                    # Background first: tmux derives light/dark reports from it.
+                    query = b'\x1b]11;?\x1b\\\x1b]10;?\x1b\\'
+                    if os.write(fd, query) != len(query):
+                        raise OSError('incomplete terminal colour query')
+                finally:
+                    os.close(fd)
+            except (OSError, subprocess.SubprocessError) as error:
+                del pending[terminal]
+                print(f'Warning: tmux colour refresh failed for {terminal}: {error}; '
+                      'detach/reattach tmux before reopening Codex.', file=sys.stderr)
 
 
 def reload_tmux():
     sockets = [None]
+    terminals = {}
     if os.environ.get('TMUX'):
         sockets.insert(0, os.environ['TMUX'].split(',')[0])
     for socket in sockets:
@@ -198,8 +239,23 @@ def reload_tmux():
                 result = subprocess.run(command + ['source-file', str(STATE / 'tmux.conf')], capture_output=True, text=True)
                 if result.returncode:
                     raise RuntimeError('tmux theme reload failed after apply: ' + result.stderr.strip())
+                try:
+                    clients = subprocess.run(command + ['list-clients', '-F', '#{client_control_mode}\t#{client_pid}\t#{client_tty}'],
+                                             capture_output=True, text=True, timeout=2)
+                    if clients.returncode:
+                        raise RuntimeError(clients.stderr.strip() or 'client listing failed')
+                    for line in clients.stdout.splitlines():
+                        fields = line.split('\t', 2)
+                        if len(fields) == 3:
+                            control, pid, terminal = fields
+                            if control == '0' and terminal and pid.isdecimal() and int(pid) > 0:
+                                terminals[terminal] = int(pid)
+                except (OSError, RuntimeError, subprocess.SubprocessError) as error:
+                    print(f'Warning: tmux colour refresh unavailable: {error}; '
+                          'detach/reattach tmux before reopening Codex.', file=sys.stderr)
         except FileNotFoundError:
             break
+    refresh_tmux_colours(terminals)
 
 
 def codex_theme(p):
@@ -263,13 +319,16 @@ def status(mode, verbose):
     except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
         print('Integration preflight: ' + str(error))
     print('Neovim: ' + ('saved mode watched; live appearance unverified' if shutil.which('nvim') else 'not installed; skipped'))
+    print('tmux: ' + ('terminal colour queries retried on apply for up to 2 seconds; '
+                     'cache and live appearance unverified' if shutil.which('tmux') else 'not installed; skipped'))
     if os.environ.get('DOTFILES_THEME_NO_APPS') == '1':
         print('Agent apps: disabled; skipped')
     else:
         claude = Path(os.environ.get('CLAUDE_CONFIG_DIR', Path.home() / '.claude'))
         codex = Path(os.environ.get('CODEX_HOME', Path.home() / '.codex'))
         print('Claude Code: ' + ('custom theme managed on apply; live appearance unverified' if claude.is_dir() else 'config directory absent; skipped'))
-        print('Codex: ' + ('syntax theme managed on apply; running sessions may need resume' if codex.is_dir() else 'config directory absent; skipped'))
+        print('Codex: ' + ('syntax theme managed on apply; exit and run codex resume to refresh; '
+                          'if still stale, detach/reattach tmux first' if codex.is_dir() else 'config directory absent; skipped'))
 
 
 def main():
@@ -298,10 +357,13 @@ def main():
         values = palettes()
         preflight(mode, values)
         windows(mode, values)
-        apps(mode, values[mode])
+        codex_updated = apps(mode, values[mode])
         atomic(STATE / 'tmux.conf', tmux_style(values[mode]))
         atomic(STATE / 'mode', mode + '\n')
         reload_tmux()
+        if codex_updated:
+            print('Warning: Codex: exit and run codex resume to refresh interface and syntax colours; '
+                  'if still stale, detach/reattach tmux first.', file=sys.stderr)
         print(mode)
 
 

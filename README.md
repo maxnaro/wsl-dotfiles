@@ -311,9 +311,10 @@ dotfiles-theme status
 dotfiles-theme status --verbose
 ```
 
-Tmux prefix + `T` toggles silently in the background; errors and refresh warnings
-appear briefly in the status line. Both Ctrl-b and Ctrl-a prefixes work. The saved
-choice persists under `${XDG_STATE_HOME:-~/.local/state}/dotfiles/theme`;
+Tmux prefix + `T` toggles in the background. Captured warnings appear briefly in
+the status line even when the switch succeeds; a warning-free success stays silent,
+and failures without stderr show a generic error. Both Ctrl-b and Ctrl-a prefixes
+work. The saved choice persists under `${XDG_STATE_HOME:-~/.local/state}/dotfiles/theme`;
 `dotfiles-theme apply` reapplies it. Switching does not edit tracked configuration.
 
 The command validates app configuration and destinations before applying changes.
@@ -322,15 +323,25 @@ failure is reported, but cannot make updates across independent apps atomic.
 Concurrent toggles are serialized. `status --verbose` checks integration readiness
 and explains refresh limits; it does not claim to verify live pixels.
 
+After applying a theme, the command asks attached tmux clients' terminals for fresh
+foreground and background colors so tmux can update its cache. It retries over two
+seconds because Windows Terminal may reload settings asynchronously. This is best
+effort; it does not verify rendered pixels or cached colors. The generated tmux
+styles keep default pane backgrounds, preserving acrylic at 75% opacity and both palettes.
+
 Terminal, tmux, and open Neovim instances follow the saved mode. Claude Code is
 pointed at generated `~/.claude/themes/dotfiles.json` with `theme: custom:dotfiles`;
 this replaces any independently selected Claude theme. Native reload handles
 running sessions where supported; sessions started before the themes directory
 existed may need reopening. Codex receives a generated Kimbie syntax theme in light
 mode; dark retains its default. Running Codex sessions may retain startup prompt
-or syntax colors, so each apply reports a reopen/resume warning when Codex is
-configured. No agent session is killed, interrupted, or restarted, and no draft is
-cleared to refresh colors.
+or syntax colors, so each apply reports a restart warning when Codex is
+configured. To refresh an existing Codex session, exit the process and run
+`codex resume` from its shell; `/resume` inside the same TUI does not reload its
+startup colors. If the terminal still shows stale colors, detach and reattach tmux,
+then reopen Codex. Theme switching does not restart sessions, clear drafts, or
+change agent session state. A standalone private-PTY regression check is available
+with `python3 tests/live_tmux_theme.py`.
 
 LazyGit inside Neovim receives an updated RGB theme on each switch; hide/show its
 popup or re-enter terminal input mode to reload. Reopen standalone LazyGit,
