@@ -153,6 +153,9 @@ if [ -f "$DOTFILES_DIR/bash/.inputrc" ]; then
     link_file "$DOTFILES_DIR/bash/.inputrc" "$HOME/.inputrc"
 fi
 
+# Link global Codex delegation instructions
+link_file "$DOTFILES_DIR/codex/.codex/AGENTS.md" "${CODEX_HOME:-$HOME/.codex}/AGENTS.md"
+
 # Link git configuration if present
 if [ -f "$DOTFILES_DIR/git/.gitconfig" ]; then
     link_file "$DOTFILES_DIR/git/.gitconfig" "$HOME/.gitconfig"
