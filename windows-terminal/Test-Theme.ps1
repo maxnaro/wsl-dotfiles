@@ -10,14 +10,15 @@ try {
  "custom": "https://example.com/a//b",
  "defaultProfile": "keep-guid",
  "profiles": {"defaults": {"font":{"face":"keep-font"}}, "list":[{"guid":"keep-guid","colorScheme":"old","opacity":85},]},
- "schemes": [{"name":"unrelated","background":"#123456"}],
+ "schemes": [{"name":"unrelated","background":"#123456"},{"name":"Chocolatier Light"},{"name":"Gruvbox Light","background":"#FFFFFF"}],
 }
 '@)
-    [IO.File]::WriteAllText($schemes, '[{"name":"Chocolatier"},{"name":"Chocolatier Light"}]')
+    [IO.File]::WriteAllText($schemes, '[{"name":"Chocolatier"},{"name":"Gruvbox Light","background":"#FBF1C7"}]')
     & "$PSScriptRoot\Apply-Theme.ps1" -Mode light -SchemesPath $schemes -SettingsPath $settings
     $config = [IO.File]::ReadAllText($settings) | ConvertFrom-Json
     if ($config.custom -ne 'https://example.com/a//b' -or $config.defaultProfile -ne 'keep-guid' -or $config.profiles.defaults.font.face -ne 'keep-font' -or $config.profiles.list[0].opacity -ne 85) { throw 'Unrelated setting changed' }
-    if ($config.theme -ne 'light' -or $config.profiles.list[0].colorScheme -ne 'Chocolatier Light' -or $config.schemes.Count -ne 3) { throw 'Theme update failed' }
+    if ($config.theme -ne 'light' -or $config.profiles.list[0].colorScheme -ne 'Gruvbox Light' -or $config.schemes.Count -ne 3) { throw 'Theme update failed' }
+    if ($config.profiles.defaults.colorScheme -ne 'Gruvbox Light' -or @($config.schemes | Where-Object name -eq 'Chocolatier Light').Count -ne 0 -or @($config.schemes | Where-Object name -eq 'Gruvbox Light').Count -ne 1 -or ($config.schemes | Where-Object name -eq 'Gruvbox Light').background -ne '#FBF1C7') { throw 'Scheme migration failed' }
     $before = [IO.File]::ReadAllText($settings)
     & "$PSScriptRoot\Apply-Theme.ps1" -Mode light -SchemesPath $schemes -SettingsPath $settings
     if ((Get-ChildItem "$settings.dotfiles-*.bak").Count -ne 1 -or [IO.File]::ReadAllText($settings) -ne $before) { throw 'Repeated apply not idempotent' }

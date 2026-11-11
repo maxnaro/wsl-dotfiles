@@ -233,7 +233,7 @@ normally check out a detached HEAD; switch to `main` before making changes.
 
 LazyVim uses a transparent, compact status line with file changes, Git details,
 diagnostics, and cursor position. Its text, syntax accents, selection surfaces, and LazyGit borders match the
-terminal's Chocolatier palette. Buffer tabs are disabled; native tab pages remain available. In LazyGit, Escape dismisses dialogs and subviews,
+shared terminal palette. Buffer tabs are disabled; native tab pages remain available. In LazyGit, Escape dismisses dialogs and subviews,
 then quits from the top level; `q` also quits. Existing leader shortcuts remain.
 
 Setup links `lazygit/.config/lazygit/config.yml` to `~/.config/lazygit/config.yml`,
@@ -294,8 +294,10 @@ LazyGit uses Snacks; the former plugin's `:LazyGit*` commands are retired.
 
 ### Shared light and dark themes
 
-Chocolatier dark and warm parchment light share one palette in
-`themes/chocolatier.json`. Install the theme controls without reinstalling tools:
+Chocolatier dark and [Gruvbox Light](https://github.com/morhetz/gruvbox) (medium contrast,
+background `#FBF1C7`) share one palette in `themes/chocolatier.json`. Neovim loads
+the Gruvbox colourscheme with medium light contrast and preserves transparent editor backgrounds, floats, gutters, and status
+lines. Dark mode retains Chocolatier. Install the theme controls without reinstalling tools:
 
 ```bash
 bash themes/install.sh
@@ -305,10 +307,17 @@ dotfiles-theme toggle
 dotfiles-theme status
 ```
 
-Tmux prefix + `T` toggles the theme. Both Ctrl-b and Ctrl-a prefixes work.
+Tmux prefix + `T` toggles the theme silently in the background; failures appear
+briefly in the tmux status line. Both Ctrl-b and Ctrl-a prefixes work.
 The saved choice persists under `${XDG_STATE_HOME:-~/.local/state}/dotfiles/theme`;
 `dotfiles-theme apply` reapplies it. Switching does not edit tracked files.
-Terminal, tmux, and open Neovim instances update live. Reopen active LazyGit,
+Terminal, tmux, and open Neovim instances update live. Claude Code uses the
+generated `~/.claude/themes/dotfiles.json` (`"theme": "custom:dotfiles"`, set by
+`themes/install.sh` when the theme was unset or `auto`), which running sessions
+reload on change; sessions started before that folder existed need one restart.
+Codex follows the terminal palette live and its `[tui] theme` is set to
+`gruvbox-light` or `gruvbox-dark` for syntax highlighting, which applies to new or
+resumed sessions. Reopen active LazyGit,
 history searches, pickers, and existing embedded terminals if their colors persist.
 Shell prompts, Fish syntax, fzf, bat previews/man pages, eza, and Atuin use the
 terminal's ANSI palette. Windows desktop components remain independent.

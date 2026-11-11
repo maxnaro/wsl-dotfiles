@@ -29,13 +29,13 @@ $schemes = [IO.File]::ReadAllText($SchemesPath) | ConvertFrom-Json
 function Put($object, $name, $value) { $object | Add-Member -NotePropertyName $name -NotePropertyValue $value -Force }
 if (-not $config.profiles) { Put $config 'profiles' ([pscustomobject]@{}) }
 if (-not $config.profiles.defaults) { Put $config.profiles 'defaults' ([pscustomobject]@{}) }
-$name = if ($Mode -eq 'dark') { 'Chocolatier' } else { 'Chocolatier Light' }
+$name = if ($Mode -eq 'dark') { 'Chocolatier' } else { 'Gruvbox Light' }
 Put $config 'theme' $Mode
 Put $config.profiles.defaults 'colorScheme' $name
 foreach ($profile in $config.profiles.list) {
     if ($profile.PSObject.Properties['colorScheme']) { Put $profile 'colorScheme' $name }
 }
-Put $config 'schemes' @(@($config.schemes | Where-Object { $_.name -notin @('Chocolatier', 'Chocolatier Light') }) + @($schemes))
+Put $config 'schemes' @(@($config.schemes | Where-Object { $_.name -notin @('Chocolatier', 'Chocolatier Light', 'Gruvbox Light') }) + @($schemes))
 $updated = $config | ConvertTo-Json -Depth 100
 if (($json | ConvertFrom-Json | ConvertTo-Json -Depth 100) -eq $updated) { return }
 $backup = $SettingsPath + '.dotfiles-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fffffff') + '.bak'

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply the shared Chocolatier palette without editing tracked configuration."""
+"""Apply the shared Chocolatier dark and Gruvbox Light (medium contrast) palettes without editing tracked configuration."""
 import argparse
 import fcntl
 import json
@@ -27,7 +27,7 @@ def palettes():
 def schemes(values):
     names = ['black', 'red', 'green', 'yellow', 'blue', 'purple', 'cyan', 'white',
              'brightBlack', 'brightRed', 'brightGreen', 'brightYellow', 'brightBlue', 'brightPurple', 'brightCyan', 'brightWhite']
-    return [dict(zip(names, p['ansi']), name='Chocolatier' if mode == 'dark' else 'Chocolatier Light',
+    return [dict(zip(names, p['ansi']), name='Chocolatier' if mode == 'dark' else 'Gruvbox Light',
                  background=p['bg'], foreground=p['fg'], cursorColor=p['bright'], selectionBackground=p['selection'])
             for mode, p in values.items()]
 
@@ -83,6 +83,64 @@ def windows(mode, values):
         print(result.stdout.strip())
 
 
+def mix(color, base, amount):
+    """Blend `amount` of `color` into `base` for tinted backgrounds."""
+    a, b = (int(color[i:i + 2], 16) for i in (1, 3, 5)), (int(base[i:i + 2], 16) for i in (1, 3, 5))
+    return '#' + ''.join(f'{round(x * amount + y * (1 - amount)):02X}' for x, y in zip(a, b))
+
+
+def claude_theme(mode, p):
+    """Claude Code custom theme; running sessions reload ~/.claude/themes/*.json on change."""
+    tokens = {
+        'text': p['fg'], 'inverseText': p['bg'], 'inactive': p['picker']['muted'], 'subtle': p['muted'],
+        'promptBorder': p['muted'], 'promptBorderShimmer': p['selection'],
+        'permission': p['blue'], 'suggestion': p['blue'], 'ide': p['blue'], 'remember': p['blue'],
+        'planMode': p['cyan'], 'background': p['cyan'],
+        'autoAccept': p['purple'], 'skill': p['purple'], 'merged': p['purple'], 'bashBorder': p['purple'],
+        'success': p['green'], 'error': p['red'], 'warning': p['yellow'],
+        'diffAdded': mix(p['green'], p['bg'], 0.3), 'diffRemoved': mix(p['red'], p['bg'], 0.3),
+        'diffAddedDimmed': mix(p['green'], p['bg'], 0.15), 'diffRemovedDimmed': mix(p['red'], p['bg'], 0.15),
+        'diffAddedWord': p['green'], 'diffRemovedWord': p['red'],
+        'userMessageBackground': p['surface'], 'userMessageBackgroundHover': p['selection'],
+        'bashMessageBackgroundColor': p['surface'], 'memoryBackgroundColor': p['surface'],
+        'selectionBg': p['selection'], 'clawd_background': p['bg'],
+    }
+    return {'name': 'Dotfiles', 'base': mode, 'overrides': tokens}
+
+
+def set_toml_key(text, section, key, value):
+    """Set `key = "value"` in a TOML [section] with a line edit, leaving everything else untouched."""
+    lines, line = text.splitlines(), f'{key} = "{value}"'
+    try:
+        start = lines.index(f'[{section}]')
+    except ValueError:
+        return text.rstrip('\n') + ('\n\n' if text.strip() else '') + f'[{section}]\n{line}\n'
+    end = next((i for i in range(start + 1, len(lines)) if lines[i].lstrip().startswith('[')), len(lines))
+    for i in range(start + 1, end):
+        if re.match(rf'\s*{re.escape(key)}\s*=', lines[i]):
+            lines[i] = line
+            break
+    else:
+        lines.insert(start + 1, line)
+    return '\n'.join(lines) + '\n'
+
+
+def apps(mode, p):
+    """Point Claude Code and Codex at the active palette when they are installed."""
+    if os.environ.get('DOTFILES_THEME_NO_APPS') == '1':
+        return
+    claude = Path(os.environ.get('CLAUDE_CONFIG_DIR', Path.home() / '.claude'))
+    if claude.is_dir():
+        atomic(claude / 'themes/dotfiles.json', json.dumps(claude_theme(mode, p), indent=2) + '\n')
+    codex = Path(os.environ.get('CODEX_HOME', Path.home() / '.codex'))
+    if codex.is_dir():
+        config = codex / 'config.toml'
+        text = config.read_text() if config.exists() else ''
+        updated = set_toml_key(text, 'tui', 'theme', 'gruvbox-' + mode)
+        if updated != text:
+            atomic(config, updated)
+
+
 def reload_tmux():
     sockets = [None]
     if os.environ.get('TMUX'):
@@ -117,6 +175,7 @@ def main():
             mode = args.action
         values = palettes()
         windows(mode, values)
+        apps(mode, values[mode])
         atomic(STATE / 'tmux.conf', tmux_style(values[mode]))
         atomic(STATE / 'mode', mode + '\n')
         reload_tmux()
