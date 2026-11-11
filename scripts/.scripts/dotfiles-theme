@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply the shared Chocolatier dark and Gruvbox Light (medium contrast) palettes without editing tracked configuration."""
+"""Apply the shared Chocolatier dark and Kimbie Light palettes without editing tracked configuration."""
 import argparse
 import fcntl
 import json
@@ -9,6 +9,9 @@ import re
 import subprocess
 import sys
 import tempfile
+import tomllib
+import plistlib
+import shutil
 
 ROOT = Path(__file__).resolve().parents[2]
 STATE = Path(os.environ.get('XDG_STATE_HOME', Path.home() / '.local/state')) / 'dotfiles/theme'
@@ -17,9 +20,22 @@ CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config')) / 'dot
 
 def palettes():
     values = json.loads((CONFIG if CONFIG.exists() else ROOT / 'themes/chocolatier.json').read_text())
+    if not isinstance(values, dict) or set(values) != {'dark', 'light'}:
+        raise ValueError('Shared palette requires dark and light modes')
     for p in values.values():
+        if not isinstance(p, dict):
+            raise ValueError('Invalid shared palette')
+        for key in ('bg', 'surface', 'selection', 'muted', 'fg', 'bright', 'red', 'green', 'yellow', 'blue', 'purple', 'cyan', 'ansi', 'picker'):
+            if key not in p:
+                raise ValueError('Missing palette color: ' + key)
+        if not isinstance(p['ansi'], list) or not isinstance(p['picker'], dict):
+            raise ValueError('Invalid shared palette')
+        if not {'hidden', 'muted', 'blue', 'green', 'yellow', 'red', 'purple', 'cyan'} <= p['picker'].keys():
+            raise ValueError('Missing picker color')
+        if any(not isinstance(p[key], str) for key in ('bg', 'surface', 'selection', 'muted', 'fg', 'bright', 'red', 'green', 'yellow', 'blue', 'purple', 'cyan')):
+            raise ValueError('Invalid palette color')
         colors = [v for v in p.values() if isinstance(v, str)] + p['ansi'] + list(p['picker'].values())
-        if len(p['ansi']) != 16 or not all(re.fullmatch(r'#[0-9a-fA-F]{6}', c) for c in colors):
+        if len(p['ansi']) != 16 or not all(isinstance(c, str) and re.fullmatch(r'#[0-9a-fA-F]{6}', c) for c in colors):
             raise ValueError('Invalid shared palette')
     return values
 
@@ -27,7 +43,7 @@ def palettes():
 def schemes(values):
     names = ['black', 'red', 'green', 'yellow', 'blue', 'purple', 'cyan', 'white',
              'brightBlack', 'brightRed', 'brightGreen', 'brightYellow', 'brightBlue', 'brightPurple', 'brightCyan', 'brightWhite']
-    return [dict(zip(names, p['ansi']), name='Chocolatier' if mode == 'dark' else 'Gruvbox Light',
+    return [dict(zip(names, p['ansi']), name='Chocolatier' if mode == 'dark' else 'Kimbie Light',
                  background=p['bg'], foreground=p['fg'], cursorColor=p['bright'], selectionBackground=p['selection'])
             for mode, p in values.items()]
 
@@ -62,25 +78,27 @@ def tmux_style(p):
         f'set -g @runcat-color "{p["cyan"]}"', ''])
 
 
-def windows(mode, values):
+def windows(mode, values, check=False):
     if os.environ.get('DOTFILES_THEME_NO_WINDOWS') == '1':
-        return
+        return 'disabled; skipped'
     if not os.environ.get('WSL_DISTRO_NAME') and 'microsoft' not in os.uname().release.lower():
-        return
+        return 'not WSL; skipped'
     powershell = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
     if not Path(powershell).exists():
         raise RuntimeError('Windows PowerShell unavailable; Windows Terminal was not updated')
-    payload = STATE / 'terminal-schemes.json'
-    atomic(payload, json.dumps(schemes(values)))
     def winpath(path):
         return subprocess.check_output(['wslpath', '-w', str(path)], text=True).strip()
-    result = subprocess.run([powershell, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
-                             '-File', winpath(ROOT / 'windows-terminal/Apply-Theme.ps1'),
-                             '-Mode', mode, '-SchemesPath', winpath(payload)], capture_output=True, text=True)
-    if result.returncode:
-        raise RuntimeError(result.stderr.strip() or 'Windows Terminal update failed')
-    if result.stdout.strip():
-        print(result.stdout.strip())
+    # Temporary payload also keeps verbose status from changing saved state.
+    with tempfile.TemporaryDirectory(prefix='dotfiles-theme-') as temporary:
+        payload = Path(temporary) / 'schemes.json'
+        payload.write_text(json.dumps(schemes(values)))
+        result = subprocess.run([powershell, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
+                                 '-File', winpath(ROOT / 'windows-terminal/Apply-Theme.ps1'),
+                                 '-Mode', mode, '-SchemesPath', winpath(payload)] + (['-CheckOnly'] if check else []), capture_output=True, text=True)
+        if result.returncode:
+            raise RuntimeError(result.stderr.strip() or 'Windows Terminal update failed')
+    # Backup paths remain in Windows Terminal's native settings directory.
+    return result.stdout.strip() or 'settings validated; live appearance unverified'
 
 
 def mix(color, base, amount):
@@ -90,7 +108,7 @@ def mix(color, base, amount):
 
 
 def claude_theme(mode, p):
-    """Claude Code custom theme; running sessions reload ~/.claude/themes/*.json on change."""
+    """Generate Claude Code custom theme for native reload where supported."""
     tokens = {
         'text': p['fg'], 'inverseText': p['bg'], 'inactive': p['picker']['muted'], 'subtle': p['muted'],
         'promptBorder': p['muted'], 'promptBorderShimmer': p['selection'],
@@ -136,21 +154,37 @@ def remove_toml_key(text, section, key):
     return '\n'.join(kept) + '\n' if kept != lines else text
 
 
+def codex_config(text, mode):
+    updated = set_toml_key(text, 'tui', 'theme', 'dotfiles-kimbie-light') if mode == 'light' else remove_toml_key(text, 'tui', 'theme')
+    tomllib.loads(updated)
+    return updated
+
+
 def apps(mode, p):
     """Point Claude Code and Codex at the active palette when they are installed."""
     if os.environ.get('DOTFILES_THEME_NO_APPS') == '1':
         return
     claude = Path(os.environ.get('CLAUDE_CONFIG_DIR', Path.home() / '.claude'))
     if claude.is_dir():
+        settings_path = claude / 'settings.json'
+        settings = json.loads(settings_path.read_text()) if settings_path.exists() else {}
+        needs_reopen = not (claude / 'themes').is_dir() or settings.get('theme') != 'custom:dotfiles'
+        settings['theme'] = 'custom:dotfiles'
+        atomic(settings_path.resolve(), json.dumps(settings, indent=2) + '\n')
         atomic(claude / 'themes/dotfiles.json', json.dumps(claude_theme(mode, p), indent=2) + '\n')
+        if needs_reopen:
+            print('Warning: Claude Code custom theme enabled; existing sessions may need reopening.', file=sys.stderr)
     codex = Path(os.environ.get('CODEX_HOME', Path.home() / '.codex'))
     if codex.is_dir():
         config = codex / 'config.toml'
         text = config.read_text() if config.exists() else ''
-        # Light uses Gruvbox syntax colours; dark keeps Codex's own default theme.
-        updated = set_toml_key(text, 'tui', 'theme', 'gruvbox-light') if mode == 'light' else remove_toml_key(text, 'tui', 'theme')
+        # Light uses generated Kimbie syntax colours; dark keeps Codex's own default theme.
+        updated = codex_config(text, mode)
+        if mode == 'light':
+            atomic(codex / 'themes/dotfiles-kimbie-light.tmTheme', codex_theme(p))
         if updated != text:
-            atomic(config, updated)
+            atomic(config.resolve(), updated)
+        print('Warning: Codex configuration updated; running sessions may need reopening or resuming to refresh colors.', file=sys.stderr)
 
 
 def reload_tmux():
@@ -163,29 +197,106 @@ def reload_tmux():
             if subprocess.run(command + ['has-session'], capture_output=True).returncode == 0:
                 result = subprocess.run(command + ['source-file', str(STATE / 'tmux.conf')], capture_output=True, text=True)
                 if result.returncode:
-                    print('Warning: tmux theme reload failed: ' + result.stderr.strip(), file=sys.stderr)
+                    raise RuntimeError('tmux theme reload failed after apply: ' + result.stderr.strip())
         except FileNotFoundError:
             break
+
+
+def codex_theme(p):
+    """TextMate theme adapted from Jan T. Sott's Kimbie Light (CC BY-SA 4.0)."""
+    settings = [{'settings': {'background': p['bg'], 'foreground': p['fg'],
+                             'selection': p['selection'], 'caret': p['fg']}}]
+    for scope, color in [('comment', 'muted'), ('string', 'green'), ('constant.numeric', 'yellow'),
+                         ('keyword, storage', 'purple'), ('entity.name.function, support.function', 'blue'),
+                         ('variable, entity.name.tag', 'red'), ('constant.language', 'cyan')]:
+        settings.append({'scope': scope, 'settings': {'foreground': p[color]}})
+    return plistlib.dumps({'name': 'Dotfiles Kimbie Light', 'settings': settings}).decode()
+
+
+def writable(path):
+    path = path.resolve()
+    parent = path.parent
+    while not parent.exists():
+        parent = parent.parent
+    if not parent.is_dir() or not os.access(parent, os.W_OK | os.X_OK):
+        raise ValueError(f'Cannot write {path}')
+    if path.exists() and (not path.is_file() or not os.access(path, os.W_OK)):
+        raise ValueError(f'Cannot write {path}')
+
+
+def preflight(mode, values):
+    """Validate every local destination before applying any application config."""
+    for path in (STATE / 'mode', STATE / 'tmux.conf'):
+        writable(path)
+    if os.environ.get('DOTFILES_THEME_NO_APPS') != '1':
+        claude = Path(os.environ.get('CLAUDE_CONFIG_DIR', Path.home() / '.claude'))
+        codex = Path(os.environ.get('CODEX_HOME', Path.home() / '.codex'))
+        if claude.is_dir():
+            settings = claude / 'settings.json'
+            data = json.loads(settings.read_text()) if settings.exists() else {}
+            if not isinstance(data, dict):
+                raise ValueError('Claude settings must be a JSON object')
+            for path in (settings, claude / 'themes/dotfiles.json'):
+                writable(path)
+        if codex.is_dir():
+            config = codex / 'config.toml'
+            text = config.read_text() if config.exists() else ''
+            tomllib.loads(text)
+            codex_config(text, mode)
+            for path in (config, codex / 'themes/dotfiles-kimbie-light.tmTheme'):
+                writable(path)
+    plistlib.loads(codex_theme(values[mode]).encode())
+    json.dumps(claude_theme(mode, values[mode]))
+    # Windows validates its JSONC and destination before other apps are changed.
+    return windows(mode, values, check=True)
+
+
+def status(mode, verbose):
+    print(mode)
+    if not verbose:
+        return
+    try:
+        values = palettes()
+        windows_status = preflight(mode, values)
+        print('Windows Terminal: ' + windows_status)
+        print('Integration preflight: ready (configuration checks only)')
+    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+        print('Integration preflight: ' + str(error))
+    print('Neovim: ' + ('saved mode watched; live appearance unverified' if shutil.which('nvim') else 'not installed; skipped'))
+    if os.environ.get('DOTFILES_THEME_NO_APPS') == '1':
+        print('Agent apps: disabled; skipped')
+    else:
+        claude = Path(os.environ.get('CLAUDE_CONFIG_DIR', Path.home() / '.claude'))
+        codex = Path(os.environ.get('CODEX_HOME', Path.home() / '.codex'))
+        print('Claude Code: ' + ('custom theme managed on apply; live appearance unverified' if claude.is_dir() else 'config directory absent; skipped'))
+        print('Codex: ' + ('syntax theme managed on apply; running sessions may need resume' if codex.is_dir() else 'config directory absent; skipped'))
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', nargs='?', default='status', choices=['light', 'dark', 'toggle', 'status', 'apply'])
+    parser.add_argument('--verbose', action='store_true', help='show configuration health and live-refresh limits')
     args = parser.parse_args()
+    if args.verbose and args.action != 'status':
+        parser.error('--verbose is only supported with status')
+    if args.action == 'status':
+        mode = (STATE / 'mode').read_text().strip() if (STATE / 'mode').exists() else 'dark'
+        if mode not in ('dark', 'light'):
+            raise ValueError('Invalid saved theme mode')
+        status(mode, args.verbose)
+        return
     STATE.mkdir(parents=True, exist_ok=True)
     with (STATE / 'lock').open('w') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         mode = (STATE / 'mode').read_text().strip() if (STATE / 'mode').exists() else 'dark'
         if mode not in ('dark', 'light'):
             raise ValueError('Invalid saved theme mode')
-        if args.action == 'status':
-            print(mode)
-            return
         if args.action == 'toggle':
             mode = 'light' if mode == 'dark' else 'dark'
         elif args.action in ('dark', 'light'):
             mode = args.action
         values = palettes()
+        preflight(mode, values)
         windows(mode, values)
         apps(mode, values[mode])
         atomic(STATE / 'tmux.conf', tmux_style(values[mode]))

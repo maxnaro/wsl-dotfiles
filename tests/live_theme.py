@@ -11,7 +11,6 @@ with tempfile.TemporaryDirectory() as tmp:
  lua='''vim.opt.rtp:prepend("/home/max/dotfiles/nvim/.config/nvim")
 vim.opt.rtp:prepend("/home/max/.local/share/nvim/lazy/chocolatier.nvim")
 vim.opt.rtp:prepend("/home/max/.local/share/nvim/lazy/lush.nvim")
-vim.opt.rtp:prepend("/home/max/.local/share/nvim/lazy/gruvbox")
 vim.o.termguicolors = true
 local spec = dofile("/home/max/dotfiles/nvim/.config/nvim/lua/plugins/colorscheme.lua")
 spec[1].config()
@@ -36,24 +35,22 @@ assert(require("config.palette").fg == "#D3AF86")
 vim.fn.writefile({"light"}, vim.env.XDG_STATE_HOME .. "/dotfiles/theme/mode")
 assert(vim.wait(1500, function() return vim.o.background == "light" end, 20), "watcher missed light")
 check_lazygit("light")
-assert(require("config.palette").fg == "#3C3836")
-assert(vim.g.colors_name == "gruvbox")
-assert(vim.g.gruvbox_contrast_light == "medium")
-assert(vim.api.nvim_get_hl(0,{name="Comment",link=false}).fg == tonumber("928374",16))
-assert(vim.api.nvim_get_hl(0,{name="GruvboxOrange",link=false}).fg == tonumber("AF3A03",16))
-assert(vim.api.nvim_get_hl(0,{name="GruvboxPurple",link=false}).fg == tonumber("8F3F71",16))
-assert(vim.api.nvim_get_hl(0,{name="Pmenu"}).bg == tonumber("EBDBB2",16))
+assert(require("config.palette").fg == "#221A0F")
+assert(vim.g.colors_name == "kimbie_light")
+
+assert(vim.api.nvim_get_hl(0,{name="Comment",link=false}).fg == tonumber("84613D",16))
+assert(vim.api.nvim_get_hl(0,{name="Pmenu"}).bg == tonumber("E4C6A5",16))
 local function transparent()
-  for _, name in ipairs({"Normal", "NormalNC", "NormalFloat", "SignColumn", "FoldColumn", "StatusLine", "StatusLineNC", "FloatBorder", "WinSeparator", "LazyGitFloat", "GruvboxRedSign"}) do
+  for _, name in ipairs({"Normal", "NormalNC", "NormalFloat", "SignColumn", "FoldColumn", "StatusLine", "StatusLineNC", "FloatBorder", "WinSeparator", "LazyGitFloat"}) do
     assert(vim.api.nvim_get_hl(0, {name=name, link=false}).bg == nil, name .. " lost transparency")
   end
 end
 transparent()
-vim.cmd("colorscheme gruvbox")
+vim.cmd("colorscheme kimbie_light")
 transparent()
-assert(vim.g.terminal_color_0 == "#FBF1C7")
+assert(vim.g.terminal_color_0 == "#FBEBD4")
 spec[2].opts.colorscheme()
-assert(vim.g.colors_name == "gruvbox", "LazyVim startup callback selected wrong scheme")
+assert(vim.g.colors_name == "kimbie_light", "LazyVim startup callback selected wrong scheme")
 transparent()
 vim.fn.writefile({"dark"}, vim.env.XDG_STATE_HOME .. "/dotfiles/theme/mode")
 assert(vim.wait(1500, function() return vim.o.background == "dark" end,20), "watcher missed dark")
@@ -65,7 +62,7 @@ vim.cmd("qa!")
 '''
  lua = lua.replace("/home/max/dotfiles", str(root)).replace("/home/max/.local/share", str(pathlib.Path(os.environ.get("XDG_DATA_HOME", str(pathlib.Path.home()/".local/share")))))
  # Startup must also honour a saved light mode before any watcher event.
- startup = lua[:lua.index('assert(vim.o.background == "dark")')].replace('check_lazygit("dark")', 'check_lazygit("light")') + 'assert(vim.o.background == "light")\nassert(vim.g.colors_name == "gruvbox")\nassert(vim.g.gruvbox_contrast_light == "medium")\nassert(vim.api.nvim_get_hl(0, {name="Normal", link=false}).bg == nil)\nvim.cmd("qa!")\n'
+ startup = lua[:lua.index('assert(vim.o.background == "dark")')].replace('check_lazygit("dark")', 'check_lazygit("light")') + 'assert(vim.o.background == "light")\nassert(vim.g.colors_name == "kimbie_light")\n\nassert(vim.api.nvim_get_hl(0, {name="Normal", link=false}).bg == nil)\nvim.cmd("qa!")\n'
  (s/'dotfiles/theme/mode').write_text('light\n')
  p=t/'startup.lua'; p.write_text(startup)
  result=subprocess.run(['nvim','--headless','-i','NONE','-u','NONE','-l',str(p)],env=dict(os.environ,XDG_CONFIG_HOME=str(c),XDG_STATE_HOME=str(s),XDG_CACHE_HOME=str(t/"cache")),capture_output=True,text=True,timeout=8)

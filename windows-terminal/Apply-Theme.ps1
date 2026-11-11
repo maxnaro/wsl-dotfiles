@@ -2,7 +2,8 @@
 param(
     [Parameter(Mandatory)][ValidateSet('dark', 'light')][string]$Mode,
     [Parameter(Mandatory)][string]$SchemesPath,
-    [string]$SettingsPath
+    [string]$SettingsPath,
+    [switch]$CheckOnly
 )
 $ErrorActionPreference = 'Stop'
 if (-not $SettingsPath) {
@@ -29,15 +30,29 @@ $schemes = [IO.File]::ReadAllText($SchemesPath) | ConvertFrom-Json
 function Put($object, $name, $value) { $object | Add-Member -NotePropertyName $name -NotePropertyValue $value -Force }
 if (-not $config.profiles) { Put $config 'profiles' ([pscustomobject]@{}) }
 if (-not $config.profiles.defaults) { Put $config.profiles 'defaults' ([pscustomobject]@{}) }
-$name = if ($Mode -eq 'dark') { 'Chocolatier' } else { 'Gruvbox Light' }
+$name = if ($Mode -eq 'dark') { 'Chocolatier' } else { 'Kimbie Light' }
 Put $config 'theme' $Mode
 Put $config.profiles.defaults 'colorScheme' $name
+Put $config.profiles.defaults 'opacity' 75
+Put $config.profiles.defaults 'useAcrylic' $true
 foreach ($profile in $config.profiles.list) {
+    if ($profile.PSObject.Properties['opacity']) { Put $profile 'opacity' 75 }
+    if ($profile.PSObject.Properties['useAcrylic']) { Put $profile 'useAcrylic' $true }
     if ($profile.PSObject.Properties['colorScheme']) { Put $profile 'colorScheme' $name }
 }
-Put $config 'schemes' @(@($config.schemes | Where-Object { $_.name -notin @('Chocolatier', 'Chocolatier Light', 'Gruvbox Light') }) + @($schemes))
+Put $config 'schemes' @(@($config.schemes | Where-Object { $_.name -notin @('Chocolatier', 'Chocolatier Light', 'Gruvbox Light', 'Kimbie Light') }) + @($schemes))
 $updated = $config | ConvertTo-Json -Depth 100
 if (($json | ConvertFrom-Json | ConvertTo-Json -Depth 100) -eq $updated) { return }
+if ($CheckOnly) {
+    $directory = Split-Path $SettingsPath
+    if ((Get-Item -LiteralPath $SettingsPath).IsReadOnly) { throw 'Windows Terminal settings are read-only' }
+    $probe = Join-Path $directory ([IO.Path]::GetRandomFileName())
+    try {
+        $stream = [IO.File]::Open($probe, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
+        $stream.Dispose()
+    } finally { if (Test-Path -LiteralPath $probe) { Remove-Item -LiteralPath $probe } }
+    return
+}
 $backup = $SettingsPath + '.dotfiles-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fffffff') + '.bak'
 Copy-Item -LiteralPath $SettingsPath -Destination $backup
 $temporary = Join-Path (Split-Path $SettingsPath) ([IO.Path]::GetRandomFileName())
