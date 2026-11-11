@@ -105,7 +105,6 @@ export PATH="$HOME/.local/bin:$PATH"
 # Go bin PATH (Static path avoids slow 'go env GOPATH' subshell execution)
 export PATH="${GOPATH:-$HOME/go}/bin:$PATH"
 
-export PATH="$HOME/.config/emacs/bin:$PATH"
 
 # Deduplicate PATH and retain VS Code when filtering WSL mount paths.
 _clean_path=

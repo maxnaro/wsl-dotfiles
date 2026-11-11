@@ -14,7 +14,6 @@ end
 
 # User bin & Go PATH
 fish_add_path --path ~/.local/bin
-fish_add_path --path ~/.config/emacs/bin
 fish_add_path --path (test -n "$GOPATH"; and echo "$GOPATH/bin"; or echo "$HOME/go/bin")
 
 # Pyenv
