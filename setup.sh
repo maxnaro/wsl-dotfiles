@@ -170,6 +170,8 @@ if [ -f "$DOTFILES_DIR/scripts/.scripts/auto_venv.sh" ]; then
     link_file "$DOTFILES_DIR/scripts/.scripts/auto_venv.sh" "$HOME/.scripts/auto_venv.sh"
 fi
 
+link_file "$DOTFILES_DIR/scripts/.scripts/zoxide-add.sh" "$HOME/.scripts/zoxide-add.sh"
+
 # Link LazyGit configuration
 link_file "$DOTFILES_DIR/lazygit/.config/lazygit/config.yml" "$HOME/.config/lazygit/config.yml"
 

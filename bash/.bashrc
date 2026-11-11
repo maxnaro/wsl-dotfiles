@@ -104,6 +104,7 @@ fi
 export PATH="$HOME/.local/bin:$PATH"
 # Go bin PATH (Static path avoids slow 'go env GOPATH' subshell execution)
 export PATH="${GOPATH:-$HOME/go}/bin:$PATH"
+
 export PATH="$HOME/.config/emacs/bin:$PATH"
 
 # Deduplicate PATH and retain VS Code when filtering WSL mount paths.
@@ -217,6 +218,20 @@ fi
 # Zoxide smart directory jumping (z, zi)
 if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init bash)"
+  if command -v flock >/dev/null 2>&1 && [[ -x "$HOME/.scripts/zoxide-add.sh" ]]; then
+    __zoxide_hook() {
+      local retval=$? pwd_tmp
+      pwd_tmp="$(__zoxide_pwd)"
+      if [[ $__zoxide_oldpwd != "$pwd_tmp" ]]; then
+        __zoxide_oldpwd=$pwd_tmp
+        if [[ -o history ]]; then
+          "$HOME/.scripts/zoxide-add.sh" "$pwd_tmp" </dev/null >/dev/null 2>&1 &
+          disown
+        fi
+      fi
+      return "$retval"
+    }
+  fi
 fi
 
 # Minimalist CachyOS Pure-style prompt (two-line layout with git branch and ❯ symbol)

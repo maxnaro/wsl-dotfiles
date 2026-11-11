@@ -83,6 +83,13 @@ end
 # Zoxide smart directory jumping (z, zi)
 if type -q zoxide
     zoxide init fish | source
+    if type -q flock; and test -x "$HOME/.scripts/zoxide-add.sh"
+        function __zoxide_hook --on-variable PWD
+            test -z "$fish_private_mode"; or return
+            command "$HOME/.scripts/zoxide-add.sh" (__zoxide_pwd) </dev/null >/dev/null 2>&1 &
+            disown
+        end
+    end
 end
 
 # Greeting message (pokemon-terminal-greeting)
