@@ -86,7 +86,7 @@ stow -R tmux
 stow -R --no-folding codex
 ```
 
-### Codex delegation preference
+### Codex and Claude Code delegation preference
 
 `codex/.codex/AGENTS.md` contains a standing request to use judgment when
 delegating work to subagents. Small or dependent tasks stay with the main agent;
@@ -97,6 +97,15 @@ instructions and explicit task restrictions still apply.
 backing up existing files through the normal installer behavior. GNU Stow uses
 the default `~/.codex` location; custom `CODEX_HOME` installations use setup.
 Only the instruction file is managed; Codex runtime state stays local.
+
+Setup also links the same policy to
+`${CLAUDE_CONFIG_DIR:-$HOME/.claude}/CLAUDE.md` for Claude Code, with the same
+backup and rerun behavior. Existing Claude settings and permissions stay local.
+Both tools share one policy source. `stow codex` installs only the Codex link;
+use setup to install both integrations.
+
+In fresh Claude Code sessions inside and outside this repository, run
+`/context all` and confirm the global `CLAUDE.md` appears under Memory files.
 
 Start a fresh Codex session inside and outside this repository and ask it to
 summarize its loaded delegation instructions. Both should report the standing
