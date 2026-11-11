@@ -266,24 +266,3 @@ and terminal modes. Navigation leaves input/selection mode; picker-local keys
 remain available, including Alt-h to toggle hidden files. Alt-j/k no longer move
 lines. The old Live Share aliases and `Space l` plugin-manager binding are removed.
 LazyGit uses Snacks; the former plugin's `:LazyGit*` commands are retired.
-
-## Pi workflow
-
-`pi-workflow/` is an independent Git submodule containing approval-gated plan mode,
-automatic model/reasoning routing, read-only scouts, and a bounded independent review pass.
-It requires Pi 1.5+ and your own provider login; credentials stay outside the repositories.
-
-```sh
-git submodule update --init pi-workflow
-bash pi-workflow/install.sh --default
-```
-
-In an existing Pi session run `/reload`, then `/workflow auto`. Substantial requests
-enter read-only planning and automatically launch scouts. Use `/approve` to implement;
-`/workflow manual` disables automatic orchestration, and `/workflow reset` starts a new
-task after implementation. `/plan <task>` explicitly requests planning.
-
-The installer preserves existing settings and backs them up before selecting the virtual
-router as the default. Omit `--default` to keep your current model selection. This is an
-opt-in install, not part of the full dotfiles setup. See [the package README](pi-workflow/README.md)
-for models, machine-specific configuration, budgets, safety limitations, and tests.
