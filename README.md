@@ -294,10 +294,13 @@ LazyGit uses Snacks; the former plugin's `:LazyGit*` commands are retired.
 
 ### Shared light and dark themes
 
-Chocolatier dark and [Gruvbox Light](https://github.com/morhetz/gruvbox) (medium contrast,
-background `#FBF1C7`) share one palette in `themes/chocolatier.json`. Neovim loads
-the Gruvbox colourscheme with medium light contrast and preserves transparent editor backgrounds, floats, gutters, and status
-lines. Dark mode retains Chocolatier. Install the theme controls without reinstalling tools:
+Chocolatier dark and [Kimbie Light](https://github.com/idleberg/atom-kimbie-light)
+share one palette in `themes/chocolatier.json`. Kimbie retains its cream background
+(`#FBEBD4`) and brown text (`#221A0F`), with stronger accents and labels for readable
+terminal use. [Source attribution and license](themes/KIMBIE-LIGHT.md) cover the
+adapted light theme. Chocolatier colors remain unchanged. Both modes use 75%
+Windows Terminal opacity with acrylic enabled; Neovim retains transparent editor
+backgrounds, floats, gutters, and status lines.
 
 ```bash
 bash themes/install.sh
@@ -305,25 +308,35 @@ dotfiles-theme light
 dotfiles-theme dark
 dotfiles-theme toggle
 dotfiles-theme status
+dotfiles-theme status --verbose
 ```
 
-Tmux prefix + `T` toggles the theme silently in the background; failures appear
-briefly in the tmux status line. Both Ctrl-b and Ctrl-a prefixes work.
-The saved choice persists under `${XDG_STATE_HOME:-~/.local/state}/dotfiles/theme`;
-`dotfiles-theme apply` reapplies it. Switching does not edit tracked files.
-Terminal, tmux, and open Neovim instances update live. Claude Code uses the
-generated `~/.claude/themes/dotfiles.json` (`"theme": "custom:dotfiles"`, set by
-`themes/install.sh` when the theme was unset or `auto`), which running sessions
-reload on change; sessions started before that folder existed need one restart.
-Codex’s prompt can retain its startup colors; live prompt recoloring remains an upstream limitation.
-Its syntax-highlighting `[tui] theme` is set to
-`gruvbox-light` in light mode and removed in dark mode (Codex default), which applies to new or
-resumed sessions. LazyGit inside Neovim receives an updated RGB theme on each switch;
-hide/show its popup or re-enter terminal input mode to reload without restarting its process.
-Outer-window focus alone may not reach the embedded terminal. Reopen standalone LazyGit,
-history searches, pickers, and other embedded terminals if their colors persist.
-Shell prompts, Fish syntax, fzf, bat previews/man pages, eza, and Atuin use the
-terminal's ANSI palette. Windows desktop components remain independent.
+Tmux prefix + `T` toggles silently in the background; errors and refresh warnings
+appear briefly in the status line. Both Ctrl-b and Ctrl-a prefixes work. The saved
+choice persists under `${XDG_STATE_HOME:-~/.local/state}/dotfiles/theme`;
+`dotfiles-theme apply` reapplies it. Switching does not edit tracked configuration.
+
+The command validates app configuration and destinations before applying changes.
+A failed preflight leaves the current theme intact. A later write or live-reload
+failure is reported, but cannot make updates across independent apps atomic.
+Concurrent toggles are serialized. `status --verbose` checks integration readiness
+and explains refresh limits; it does not claim to verify live pixels.
+
+Terminal, tmux, and open Neovim instances follow the saved mode. Claude Code is
+pointed at generated `~/.claude/themes/dotfiles.json` with `theme: custom:dotfiles`;
+this replaces any independently selected Claude theme. Native reload handles
+running sessions where supported; sessions started before the themes directory
+existed may need reopening. Codex receives a generated Kimbie syntax theme in light
+mode; dark retains its default. Running Codex sessions may retain startup prompt
+or syntax colors, so each apply reports a reopen/resume warning when Codex is
+configured. No agent session is killed, interrupted, or restarted, and no draft is
+cleared to refresh colors.
+
+LazyGit inside Neovim receives an updated RGB theme on each switch; hide/show its
+popup or re-enter terminal input mode to reload. Reopen standalone LazyGit,
+history searches, pickers, and other embedded terminals if colors persist. Shell
+prompts, Fish syntax, fzf, bat previews/man pages, eza, and Atuin use terminal ANSI
+colors. Windows desktop appearance remains independent.
 
 `windows-terminal/settings.json` tracks the imported Windows Terminal configuration,
 including profiles, defaults, fonts, shortcuts, and the original Chocolatier scheme.
