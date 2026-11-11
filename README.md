@@ -83,7 +83,24 @@ stow -R lazygit
 stow -R scripts
 stow -R nvim
 stow -R tmux
+stow -R --no-folding codex
 ```
+
+### Codex delegation preference
+
+`codex/.codex/AGENTS.md` contains a standing request to use judgment when
+delegating work to subagents. Small or dependent tasks stay with the main agent;
+independent work can be delegated without a fresh request. Higher-priority
+instructions and explicit task restrictions still apply.
+
+`./setup.sh` links this policy to `${CODEX_HOME:-$HOME/.codex}/AGENTS.md`,
+backing up existing files through the normal installer behavior. GNU Stow uses
+the default `~/.codex` location; custom `CODEX_HOME` installations use setup.
+Only the instruction file is managed; Codex runtime state stays local.
+
+Start a fresh Codex session inside and outside this repository and ask it to
+summarize its loaded delegation instructions. Both should report the standing
+request. Other devices inherit the preference after installing these dotfiles.
 
 ### Tmux startup and recovery
 
