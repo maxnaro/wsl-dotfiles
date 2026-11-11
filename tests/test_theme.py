@@ -32,10 +32,10 @@ class Theme(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(result.stdout.strip(), expected)
                 if action != 'status':
-                    color = '#427B58' if expected == 'light' else '#7EA69F'
+                    color = '#427B58' if expected == 'light' else '#8EC07C'
                     self.assertIn(color, (state / 'tmux.conf').read_text())
             self.assertEqual((state / 'mode').read_text(), 'dark\n')
-            self.assertIn('#7EA69F', (state / 'tmux.conf').read_text())
+            self.assertIn('#8EC07C', (state / 'tmux.conf').read_text())
             before = {p.name: p.read_bytes() for p in state.iterdir()}
             result = subprocess.run([str(COMMAND), 'invalid'], env=env, capture_output=True)
             self.assertNotEqual(result.returncode, 0)
