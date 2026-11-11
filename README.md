@@ -9,8 +9,7 @@ dotfiles/
 ├── bash/
 │   ├── .bashrc
 │   ├── .bash_aliases
-│   ├── .inputrc
-│   └── .blerc
+│   └── .inputrc
 ├── fish/
 │   └── .config/
 │       └── fish/
