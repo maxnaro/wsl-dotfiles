@@ -7,3 +7,7 @@ When the coding harness supports subagent model selection, explicitly prefer the
 Base model choices on the current harness's available models and documented cost tiers. Do not assume model names or selection mechanisms transfer between Codex and Claude Code. If costs are unknown, prefer the harness's documented lightweight tier; if model selection or tier information is unavailable, use its default. Respect explicit user model choices.
 
 Give each subagent a bounded task, coordinate shared files, and review its results. Remain responsible for integration and verification. Respect explicit task restrictions, available tools, and higher-priority instructions.
+
+# Commits
+
+Commit changes with conventional commits, with logical separation, including any uncommitted changes prior to your own
