@@ -186,6 +186,8 @@ if [ -d "$DOTFILES_DIR/tmux/.config/tmux" ]; then
     link_file "$DOTFILES_DIR/tmux/.config/tmux" "$HOME/.config/tmux"
 fi
 
+bash "$DOTFILES_DIR/themes/install.sh"
+
 # -----------------------------------------------------------------------------
 # 3. Optional: GNU Stow support
 # -----------------------------------------------------------------------------

@@ -1,0 +1,134 @@
+{
+    "launchMode": "focus",
+    "$help": "https://aka.ms/terminal-documentation",
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "actions": [],
+    "copyFormatting": "none",
+    "copyOnSelect": false,
+    "defaultProfile": "{3ada77ca-67fd-5463-a6e4-e0357cc78765}",
+    "keybindings":
+    [
+        {
+            "id": "Terminal.CopyToClipboard",
+            "keys": "ctrl+c"
+        },
+        {
+            "id": "Terminal.FindText",
+            "keys": "ctrl+shift+f"
+        },
+        {
+            "id": "Terminal.PasteFromClipboard",
+            "keys": "ctrl+v"
+        },
+        {
+            "id": "Terminal.DuplicatePaneAuto",
+            "keys": "alt+shift+d"
+        }
+    ],
+    "newTabMenu":
+    [
+        {
+            "type": "remainingProfiles"
+        }
+    ],
+    "profiles":
+    {
+        "defaults":
+        {
+            "colorScheme": "Chocolatier",
+            "cursorHeight": 26,
+            "cursorShape": "vintage",
+            "font":
+            {
+                "face": "JetBrainsMono RunCat v7",
+                "size": 11
+            },
+            "opacity": 85,
+            "useAcrylic": true
+        },
+        "list":
+        [
+            {
+                "colorScheme": "Chocolatier",
+                "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                "font":
+                {
+                    "face": "JetBrainsMono RunCat v7"
+                },
+                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+                "hidden": false,
+                "name": "Windows PowerShell"
+            },
+            {
+                "commandline": "%SystemRoot%\\System32\\cmd.exe",
+                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+                "hidden": false,
+                "name": "Command Prompt"
+            },
+            {
+                "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
+                "hidden": false,
+                "name": "Azure Cloud Shell",
+                "source": "Windows.Terminal.Azure"
+            },
+            {
+                "colorScheme": "Chocolatier",
+                "font":
+                {
+                    "face": "JetBrainsMono RunCat v7",
+                    "size": 11
+                },
+                "guid": "{3ada77ca-67fd-5463-a6e4-e0357cc78765}",
+                "hidden": false,
+                "icon": "C:\\Users\\MaxNarongchai\\AppData\\Local\\wsl\\{4032dabb-f695-4a82-a3e0-c39fba25ca48}\\shortcut.ico",
+                "name": "UbuntuNC",
+                "source": "Microsoft.WSL"
+            },
+            {
+                "colorScheme": "Chocolatier",
+                "font":
+                {
+                    "face": "JetBrainsMono RunCat v7",
+                    "size": 11
+                },
+                "guid": "{c0cf0d41-f692-5ad9-abb2-022a81cf8c94}",
+                "hidden": false,
+                "name": "Ubuntu",
+                "source": "Microsoft.WSL"
+            },
+            {
+                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "hidden": false,
+                "name": "PowerShell",
+                "source": "Windows.Terminal.PowershellCore"
+            }
+        ]
+    },
+    "schemes":
+    [
+        {
+            "background": "#221A15",
+            "black": "#2A201A",
+            "blue": "#7FA2B5",
+            "brightBlack": "#5C483C",
+            "brightBlue": "#9AB7C7",
+            "brightCyan": "#96B9B3",
+            "brightGreen": "#A2B465",
+            "brightPurple": "#CB9ECB",
+            "brightRed": "#E08577",
+            "brightWhite": "#F2E7C9",
+            "brightYellow": "#F0C36B",
+            "cursorColor": "#F2E7C9",
+            "cyan": "#7EA69F",
+            "foreground": "#D3C6AA",
+            "green": "#889B4A",
+            "name": "Chocolatier",
+            "purple": "#BC8CBC",
+            "red": "#DC7062",
+            "selectionBackground": "#44342A",
+            "white": "#D3C6AA",
+            "yellow": "#E6B450"
+        }
+    ],
+    "themes": []
+}

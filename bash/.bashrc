@@ -194,6 +194,7 @@ if command -v fzf >/dev/null 2>&1; then
 
   export FZF_DEFAULT_OPTS="
       --style=full
+      --color=16,fg:-1,bg:-1,fg+:-1,bg+:-1,hl:cyan,hl+:cyan,border:cyan,prompt:cyan,pointer:cyan,marker:magenta
       --layout=reverse
       --height=60%
       --border=rounded
@@ -246,3 +247,8 @@ PS1='\w$(_cachyos_git_branch)\n❯ '
 if command -v atuin >/dev/null 2>&1 && [[ ${__atuin_initialized:-false} != true ]]; then
   eval "$(atuin init bash --disable-up-arrow)"
 fi
+
+# Use terminal ANSI colors for syntax previews and file listings.
+export BAT_THEME=ansi
+export LS_COLORS="di=34:ln=36:ex=32:*.tar=31:*.gz=31:*.zip=31"
+export EZA_COLORS="$LS_COLORS"

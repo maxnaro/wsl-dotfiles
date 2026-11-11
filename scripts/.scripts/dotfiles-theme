@@ -1,0 +1,131 @@
+#!/usr/bin/env python3
+"""Apply the shared Chocolatier palette without editing tracked configuration."""
+import argparse
+import fcntl
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+import tempfile
+
+ROOT = Path(__file__).resolve().parents[2]
+STATE = Path(os.environ.get('XDG_STATE_HOME', Path.home() / '.local/state')) / 'dotfiles/theme'
+CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config')) / 'dotfiles/theme/palette.json'
+
+
+def palettes():
+    values = json.loads((CONFIG if CONFIG.exists() else ROOT / 'themes/chocolatier.json').read_text())
+    for p in values.values():
+        colors = [v for v in p.values() if isinstance(v, str)] + p['ansi'] + list(p['picker'].values())
+        if len(p['ansi']) != 16 or not all(re.fullmatch(r'#[0-9a-fA-F]{6}', c) for c in colors):
+            raise ValueError('Invalid shared palette')
+    return values
+
+
+def schemes(values):
+    names = ['black', 'red', 'green', 'yellow', 'blue', 'purple', 'cyan', 'white',
+             'brightBlack', 'brightRed', 'brightGreen', 'brightYellow', 'brightBlue', 'brightPurple', 'brightCyan', 'brightWhite']
+    return [dict(zip(names, p['ansi']), name='Chocolatier' if mode == 'dark' else 'Chocolatier Light',
+                 background=p['bg'], foreground=p['fg'], cursorColor=p['bright'], selectionBackground=p['selection'])
+            for mode, p in values.items()]
+
+
+def atomic(path, content):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(dir=path.parent)
+    try:
+        with os.fdopen(fd, 'w') as stream:
+            stream.write(content)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def tmux_style(p):
+    return '\n'.join([
+        f'set -g status-style "bg=default,fg={p["fg"]}"',
+        f'set -g status-left "#[fg={p["cyan"]},bold]󰞌 #S #[fg={p["muted"]}]│ "',
+        f'set -g status-right "#[fg={p["purple"]}]󰌢 #h #[fg={p["muted"]}]│ #[fg={p["cyan"]}]󰥔 %H:%M "',
+        f'setw -g window-status-format "#[fg={p["muted"]}]#I:#W"',
+        f'setw -g window-status-current-format "#[fg={p["cyan"]},bold]◆ #I:#W"',
+        f'set -g pane-border-style "fg={p["muted"]}"',
+        f'set -g pane-active-border-style "fg={p["cyan"]}"',
+        f'set -g message-style "bg=default,fg={p["cyan"]},bold"',
+        f'set -g mode-style "bg={p["selection"]},fg={p["fg"]},bold"',
+        f'set -g popup-style "bg=default,fg={p["fg"]}"',
+        f'set -g popup-border-style "fg={p["cyan"]}"',
+        f'set -g @runcat-color "{p["cyan"]}"', ''])
+
+
+def windows(mode, values):
+    if os.environ.get('DOTFILES_THEME_NO_WINDOWS') == '1':
+        return
+    if not os.environ.get('WSL_DISTRO_NAME') and 'microsoft' not in os.uname().release.lower():
+        return
+    powershell = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
+    if not Path(powershell).exists():
+        raise RuntimeError('Windows PowerShell unavailable; Windows Terminal was not updated')
+    payload = STATE / 'terminal-schemes.json'
+    atomic(payload, json.dumps(schemes(values)))
+    def winpath(path):
+        return subprocess.check_output(['wslpath', '-w', str(path)], text=True).strip()
+    result = subprocess.run([powershell, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
+                             '-File', winpath(ROOT / 'windows-terminal/Apply-Theme.ps1'),
+                             '-Mode', mode, '-SchemesPath', winpath(payload)], capture_output=True, text=True)
+    if result.returncode:
+        raise RuntimeError(result.stderr.strip() or 'Windows Terminal update failed')
+    if result.stdout.strip():
+        print(result.stdout.strip())
+
+
+def reload_tmux():
+    sockets = [None]
+    if os.environ.get('TMUX'):
+        sockets.insert(0, os.environ['TMUX'].split(',')[0])
+    for socket in sockets:
+        command = ['tmux'] + (['-S', socket] if socket else [])
+        try:
+            if subprocess.run(command + ['has-session'], capture_output=True).returncode == 0:
+                result = subprocess.run(command + ['source-file', str(STATE / 'tmux.conf')], capture_output=True, text=True)
+                if result.returncode:
+                    print('Warning: tmux theme reload failed: ' + result.stderr.strip(), file=sys.stderr)
+        except FileNotFoundError:
+            break
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', nargs='?', default='status', choices=['light', 'dark', 'toggle', 'status', 'apply'])
+    args = parser.parse_args()
+    STATE.mkdir(parents=True, exist_ok=True)
+    with (STATE / 'lock').open('w') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        mode = (STATE / 'mode').read_text().strip() if (STATE / 'mode').exists() else 'dark'
+        if mode not in ('dark', 'light'):
+            raise ValueError('Invalid saved theme mode')
+        if args.action == 'status':
+            print(mode)
+            return
+        if args.action == 'toggle':
+            mode = 'light' if mode == 'dark' else 'dark'
+        elif args.action in ('dark', 'light'):
+            mode = args.action
+        values = palettes()
+        windows(mode, values)
+        atomic(STATE / 'tmux.conf', tmux_style(values[mode]))
+        atomic(STATE / 'mode', mode + '\n')
+        reload_tmux()
+        print(mode)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+        print('dotfiles-theme: ' + str(error), file=sys.stderr)
+        sys.exit(1)

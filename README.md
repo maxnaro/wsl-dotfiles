@@ -282,3 +282,37 @@ and terminal modes. Navigation leaves input/selection mode; picker-local keys
 remain available, including Alt-h to toggle hidden files. Alt-j/k no longer move
 lines. The old Live Share aliases and `Space l` plugin-manager binding are removed.
 LazyGit uses Snacks; the former plugin's `:LazyGit*` commands are retired.
+
+### Shared light and dark themes
+
+Chocolatier dark and warm parchment light share one palette in
+`themes/chocolatier.json`. Install the theme controls without reinstalling tools:
+
+```bash
+bash themes/install.sh
+dotfiles-theme light
+dotfiles-theme dark
+dotfiles-theme toggle
+dotfiles-theme status
+```
+
+Tmux prefix + `T` toggles the theme. Both Ctrl-b and Ctrl-a prefixes work.
+The saved choice persists under `${XDG_STATE_HOME:-~/.local/state}/dotfiles/theme`;
+`dotfiles-theme apply` reapplies it. Switching does not edit tracked files.
+Terminal, tmux, and open Neovim instances update live. Reopen active LazyGit,
+history searches, pickers, and existing embedded terminals if their colors persist.
+Shell prompts, Fish syntax, fzf, bat previews/man pages, eza, and Atuin use the
+terminal's ANSI palette. Windows desktop components remain independent.
+
+`windows-terminal/settings.json` tracks the imported Windows Terminal configuration,
+including profiles, defaults, fonts, shortcuts, and the original Chocolatier scheme.
+The live file stays at its native Windows location; this is managed apply rather
+than a symlink into WSL. On WSL, the theme command discovers stable, preview, or
+unpackaged Terminal settings, in that order, and applies both shared schemes through
+Windows PowerShell. It preserves unrelated settings and updates profile color
+scheme overrides. Each change creates a timestamped `.dotfiles-*.bak` beside the
+live JSON. Restore by copying the desired backup over `settings.json`, then run
+`dotfiles-theme apply` to coordinate the remaining apps. The tracked snapshot is
+also available for a complete manual restore on this machine. JSONC is accepted;
+comments and formatting are normalized on write. Invalid JSON leaves the file intact.
+Linux installations without Windows Terminal apply the WSL themes normally.

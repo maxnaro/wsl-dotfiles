@@ -65,6 +65,7 @@ if type -q fzf
 
     set -gx FZF_DEFAULT_OPTS "
       --style=full
+      --color=16,fg:-1,bg:-1,fg+:-1,bg+:-1,hl:cyan,hl+:cyan,border:cyan,prompt:cyan,pointer:cyan,marker:magenta
       --layout=reverse
       --height=60%
       --border=rounded
@@ -104,3 +105,16 @@ if type -q atuin; and not set -q _dotfiles_atuin_initialized
     atuin init fish --disable-up-arrow | source
     set -g _dotfiles_atuin_initialized 1
 end
+
+# Use terminal ANSI colors for syntax previews and file listings.
+set -gx BAT_THEME ansi
+set -gx LS_COLORS "di=34:ln=36:ex=32:*.tar=31:*.gz=31:*.zip=31"
+set -gx EZA_COLORS $LS_COLORS
+set -g fish_color_command cyan
+set -g fish_color_param normal
+set -g fish_color_quote green
+set -g fish_color_error red
+set -g fish_color_operator magenta
+set -g fish_color_comment brblack
+set -g fish_color_autosuggestion brblack
+set -g fish_color_search_match --background=cyan black
