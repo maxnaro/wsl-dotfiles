@@ -96,6 +96,7 @@ class Theme(unittest.TestCase):
                     command.apps(mode, palette[mode])
                     theme = json.loads((claude / 'themes/dotfiles.json').read_text())
                     self.assertEqual(theme['base'], mode)
+                    self.assertEqual('theme =' in (codex / 'config.toml').read_text(), mode == 'light')
                     self.assertEqual(theme['overrides']['text'], palette[mode]['fg'])
                     self.assertEqual(theme['overrides']['userMessageBackground'], palette[mode]['surface'])
                     for value in theme['overrides'].values():

@@ -316,7 +316,7 @@ generated `~/.claude/themes/dotfiles.json` (`"theme": "custom:dotfiles"`, set by
 `themes/install.sh` when the theme was unset or `auto`), which running sessions
 reload on change; sessions started before that folder existed need one restart.
 Codex follows the terminal palette live and its `[tui] theme` is set to
-`gruvbox-light` or `gruvbox-dark` for syntax highlighting, which applies to new or
+`gruvbox-light` in light mode and removed in dark mode (Codex default), which applies to new or
 resumed sessions. Reopen active LazyGit,
 history searches, pickers, and existing embedded terminals if their colors persist.
 Shell prompts, Fish syntax, fzf, bat previews/man pages, eza, and Atuin use the

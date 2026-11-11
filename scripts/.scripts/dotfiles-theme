@@ -125,6 +125,17 @@ def set_toml_key(text, section, key, value):
     return '\n'.join(lines) + '\n'
 
 
+def remove_toml_key(text, section, key):
+    """Delete `key` from a TOML [section] with a line edit, leaving everything else untouched."""
+    lines = text.splitlines()
+    if f'[{section}]' not in lines:
+        return text
+    start = lines.index(f'[{section}]')
+    end = next((i for i in range(start + 1, len(lines)) if lines[i].lstrip().startswith('[')), len(lines))
+    kept = [l for i, l in enumerate(lines) if not (start < i < end and re.match(rf'\s*{re.escape(key)}\s*=', l))]
+    return '\n'.join(kept) + '\n' if kept != lines else text
+
+
 def apps(mode, p):
     """Point Claude Code and Codex at the active palette when they are installed."""
     if os.environ.get('DOTFILES_THEME_NO_APPS') == '1':
@@ -136,7 +147,8 @@ def apps(mode, p):
     if codex.is_dir():
         config = codex / 'config.toml'
         text = config.read_text() if config.exists() else ''
-        updated = set_toml_key(text, 'tui', 'theme', 'gruvbox-' + mode)
+        # Light uses Gruvbox syntax colours; dark keeps Codex's own default theme.
+        updated = set_toml_key(text, 'tui', 'theme', 'gruvbox-light') if mode == 'light' else remove_toml_key(text, 'tui', 'theme')
         if updated != text:
             atomic(config, updated)
 
