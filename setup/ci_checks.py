@@ -70,36 +70,112 @@ def prepare(home):
 
 
 def plugins():
-    """Bootstrap lazy at its lock, restore plugins, then assert every locked checkout."""
+    """Resolve specs without startup, pre-clone locked commits, then test real startup."""
     config = Path(os.environ['XDG_CONFIG_HOME']) / 'nvim'
     lock_path = config / 'lazy-lock.json'
-    lock = json.loads(lock_path.read_text())
+    original_lock = lock_path.read_bytes()
+    lock = json.loads(original_lock)
     directory = Path(os.environ['XDG_DATA_HOME']) / 'nvim/lazy'
-    lazy = directory / 'lazy.nvim'
-    if not lazy.exists():
-        run('git', 'clone', '--filter=blob:none', '--no-checkout', 'https://github.com/folke/lazy.nvim.git', lazy)
-    run('git', '-C', lazy, 'fetch', '--depth=1', 'origin', lock['lazy.nvim']['commit'])
-    run('git', '-C', lazy, 'checkout', '--detach', lock['lazy.nvim']['commit'])
-    # lazy's install task reads the lockfile; restore also repairs cached checkouts.
-    active_path = config / 'ci-active-plugins.json'
-    export = ('lua local p = {}; for name, plugin in pairs(require("lazy.core.config").plugins) do '
-              'p[name] = plugin.dir end; vim.fn.writefile({vim.json.encode(p)}, '
-              'vim.fn.stdpath("config") .. "/ci-active-plugins.json")')
-    run('nvim', '--headless', '+Lazy! restore', '-c', export, '+qa!', timeout=600)
-    if json.loads(lock_path.read_text()) != lock:
-        raise AssertionError('Plugin bootstrap changed lazy-lock.json')
-    for name, path in json.loads(active_path.read_text()).items():
-        if name not in lock:
-            raise AssertionError(f'{name}: active plugin has no lock entry')
-        spec = lock[name]
-        checkout = Path(path)
+
+    def clone(name, url):
+        if name not in lock or not re.fullmatch(r'[0-9a-f]{40}', lock[name]['commit']):
+            raise AssertionError(f'{name}: active plugin needs an immutable lock commit')
+        checkout = directory / name
+        if not checkout.exists():
+            run('git', 'clone', '--quiet', '--filter=blob:none', '--no-checkout', url, checkout)
+        present = subprocess.run(['git', '-C', str(checkout), 'cat-file', '-e', lock[name]['commit'] + '^{commit}'],
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if present.returncode:
+            run('git', '-C', checkout, 'fetch', '--quiet', '--depth=1', 'origin', lock[name]['commit'])
+        run('git', '-C', checkout, 'checkout', '--quiet', '--detach', lock[name]['commit'])
         actual = subprocess.check_output(['git', '-C', str(checkout), 'rev-parse', 'HEAD'], text=True).strip()
-        if actual != spec['commit']:
-            raise AssertionError(f'{name}: expected lock {spec["commit"]}, got {actual}')
-    # Disable missing-plugin installation for all subsequent candidate tests.
+        if actual != lock[name]['commit']:
+            raise AssertionError(f'{name}: expected {lock[name]["commit"]}, got {actual}')
+
+    clone('lazy.nvim', 'https://github.com/folke/lazy.nvim.git')
+    clone('LazyVim', 'https://github.com/LazyVim/LazyVim.git')
     lazy_config = config / 'lua/config/lazy.lua'
     lazy_config.write_text(lazy_config.read_text().replace('install = { colorscheme =',
                                                           'install = { missing = false, colorscheme ='))
+    # External language servers, formatters, and grammars are outside the theme/notebook
+    # checks. Keep plugin configuration active while suppressing their live installers.
+    (config / 'lua/plugins/zz_ci.lua').write_text('''return {
+  { "mason-org/mason.nvim", opts = function(_, opts) opts.ensure_installed = {} end },
+  { "mason-org/mason-lspconfig.nvim", opts = function(_, opts) opts.ensure_installed = {} end },
+  { "neovim/nvim-lspconfig", opts = function(_, opts) opts.servers = {} end },
+}
+''')
+    active_path = config / 'ci-active-plugins.json'
+    resolver = config / 'ci-resolve.lua'
+    resolver.write_text('''vim.o.loadplugins = true
+vim.opt.rtp:prepend(vim.fn.stdpath("data") .. "/lazy/lazy.nvim")
+vim.opt.rtp:prepend(vim.fn.stdpath("data") .. "/lazy/LazyVim")
+local loader = require("lazy.core.loader")
+loader.setup = function() require("lazy.core.plugin").load() end
+loader.startup = function() end
+require("config.lazy")
+local plugins = {}
+for name, plugin in pairs(require("lazy.core.config").plugins) do
+  plugins[name] = { url = plugin.url, dir = plugin.dir }
+end
+vim.fn.writefile({vim.json.encode(plugins)}, vim.fn.stdpath("config") .. "/ci-active-plugins.json")
+vim.cmd("qa!")
+''')
+    run('nvim', '--headless', '-u', 'NONE', '-l', resolver, timeout=60)
+    active = json.loads(active_path.read_text())
+    if not isinstance(active, dict) or 'LazyVim' not in active:
+        raise AssertionError('Resolver did not load the active LazyVim specification')
+    for name, spec in active.items():
+        clone(name, spec['url'])
+    if lock_path.read_bytes() != original_lock:
+        raise AssertionError('Spec resolution changed lazy-lock.json')
+    instrumentation = config / 'ci-errors.lua'
+    instrumentation.write_text('''vim.g.ci_errors = {}
+local function record(message)
+  local errors = vim.g.ci_errors
+  errors[#errors + 1] = type(message) == "string" and message or vim.inspect(message)
+  vim.g.ci_errors = errors
+end
+local lazy = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+vim.opt.rtp:prepend(lazy)
+local util = require("lazy.core.util")
+local original = util.error
+util.error = function(message, ...) record(message); return original(message, ...) end
+local notify = vim.notify
+vim.notify = function(message, level, ...)
+  if level == vim.log.levels.ERROR then record(message) end
+  return notify(message, level, ...)
+end
+''')
+    probe = ('lua local ok, failure = xpcall(function() '
+             'local ready = vim.wait(180000, function() '
+             'local present, ts = pcall(require, "nvim-treesitter"); if not present then return false end; '
+             'local installed = ts.get_installed(); '
+             'for _, name in ipairs(LazyVim.opts("nvim-treesitter").ensure_installed or {}) do '
+             'if not vim.tbl_contains(installed, name) then return false end end; return true end, 100); '
+             'assert(ready, "Treesitter setup did not complete"); '
+             'assert(#vim.g.ci_errors == 0, vim.inspect(vim.g.ci_errors)); '
+             'assert(vim.v.errmsg == "", vim.v.errmsg) end, debug.traceback); '
+             'if not ok then vim.api.nvim_err_writeln(failure); vim.cmd("cquit 1") end')
+    run('nvim', '--headless', '--cmd', 'luafile ' + str(instrumentation),
+        '-u', config / 'init.lua', '-c', probe, '+qa!', timeout=210)
+    for name, spec in active.items():
+        actual = subprocess.check_output(['git', '-C', spec['dir'], 'rev-parse', 'HEAD'], text=True).strip()
+        if actual != lock[name]['commit']:
+            raise AssertionError(f'{name}: startup changed its locked checkout')
+    if lock_path.read_bytes() != original_lock:
+        raise AssertionError('Full startup changed lazy-lock.json')
+
+
+def smoke():
+    for shell in ('bash', 'fish'):
+        initialization = subprocess.check_output(['atuin', 'init', shell], text=True)
+        subprocess.run([shell, '-n'], input=initialization, text=True, check=True)
+    result = subprocess.check_output(['fzf', '--filter', 'candidate-smoke'],
+                                     input='other\ncandidate-smoke\n', text=True)
+    if result.strip() != 'candidate-smoke':
+        raise AssertionError('fzf filter did not select the candidate input')
+    run('fastfetch', '--config', 'none', '--logo', 'none', '--structure', 'OS:Kernel:Shell')
 
 
 def syntax():
@@ -123,7 +199,7 @@ def syntax():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=('prepare', 'plugins', 'syntax'))
+    parser.add_argument('command', choices=('prepare', 'plugins', 'syntax', 'smoke'))
     parser.add_argument('--home', type=Path)
     args = parser.parse_args()
     if args.command == 'prepare':

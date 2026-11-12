@@ -55,6 +55,7 @@ jobs:
         run: |
           python -m unittest discover -s tests -p 'test_*.py' -v
           python setup/ci_checks.py syntax
+          python setup/ci_checks.py smoke
       - name: Private tmux integration checks
         run: |
           python tests/live_prefix_help.py
@@ -63,11 +64,12 @@ jobs:
           python tmux/.config/tmux/plugins/tmux-runcat/tests/live_tmux.py
           python tmux/.config/tmux/plugins/tmux-runcat/tests/roaming_tmux.py
           python tmux/.config/tmux/plugins/tmux-runcat/tests/idle_memory.py
+      - name: Prepare isolated notebook Python host
+        run: bash "$XDG_CONFIG_HOME/nvim/scripts/setup-jupyter.sh"
       - name: Restore locked Neovim plugins
         run: python setup/ci_checks.py plugins
       - name: Neovim theme and notebook checks
         run: |
-          bash "$XDG_CONFIG_HOME/nvim/scripts/setup-jupyter.sh"
           nvim --headless '+UpdateRemotePlugins' '+qa!'
           python tests/live_theme.py
           "$XDG_DATA_HOME/nvim/jupyter/bin/python" "$XDG_CONFIG_HOME/nvim/tests/jupyter.py"
