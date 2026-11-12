@@ -5,6 +5,11 @@
 
 set -euo pipefail
 
+# Explicit upgrades and rollback bypass bootstrap, Rust builds, and dotfile links.
+if (( $# )); then
+    exec python3 "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/setup/install_tools.py" "$@"
+fi
+
 # ANSI color output
 CYAN='\033[1;36m'
 GREEN='\033[1;32m'
