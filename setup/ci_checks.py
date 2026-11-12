@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import re
+import runpy
 import shutil
 import subprocess
 import sys
@@ -167,6 +168,22 @@ end
         raise AssertionError('Full startup changed lazy-lock.json')
 
 
+def notebook():
+    # Molten writes its kernel connection file directly. A fresh CI home has not
+    # run Jupyter yet, so its private runtime directory must exist first.
+    from jupyter_core.paths import jupyter_runtime_dir
+    Path(jupyter_runtime_dir()).mkdir(parents=True, exist_ok=True, mode=0o700)
+    script = Path(os.environ['XDG_CONFIG_HOME']) / 'nvim/tests/jupyter.py'
+    try:
+        runpy.run_path(str(script), run_name='__main__')
+    except subprocess.TimeoutExpired as error:
+        for label, output in (('stdout', error.stdout), ('stderr', error.stderr)):
+            if output:
+                text = output.decode(errors='replace') if isinstance(output, bytes) else output
+                print(f'Notebook timeout {label}:\n{text}', file=sys.stderr)
+        raise
+
+
 def smoke():
     for shell in ('bash', 'fish'):
         initialization = subprocess.check_output(['atuin', 'init', shell], text=True)
@@ -199,7 +216,7 @@ def syntax():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=('prepare', 'plugins', 'syntax', 'smoke'))
+    parser.add_argument('command', choices=('prepare', 'plugins', 'syntax', 'smoke', 'notebook'))
     parser.add_argument('--home', type=Path)
     args = parser.parse_args()
     if args.command == 'prepare':

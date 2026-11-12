@@ -72,7 +72,7 @@ jobs:
         run: |
           nvim --headless '+UpdateRemotePlugins' '+qa!'
           python tests/live_theme.py
-          "$XDG_DATA_HOME/nvim/jupyter/bin/python" "$XDG_CONFIG_HOME/nvim/tests/jupyter.py"
+          "$XDG_DATA_HOME/nvim/jupyter/bin/python" setup/ci_checks.py notebook
       - name: Record terminal performance without timing thresholds
         run: |
           mkdir -p "$RUNNER_TEMP/performance"
