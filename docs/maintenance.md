@@ -48,6 +48,26 @@ Fish scripts. Tests use temporary homes and mocked downloads and do not execute
 the real full setup. Release metadata has been verified for both architectures;
 ARM64 binaries still require a real ARM64 machine for execution validation.
 
+For typing latency, run `python3 tests/live_terminal_latency.py`. It compares
+direct PTY echo, a private tmux server without configuration, and a private
+server with these dotfiles. It reports median, p95, maximum, 500-character burst
+latency, and output bytes per key on a filled screen. These measurements cover
+the Linux PTY path; they exclude physical keyboard input, the WSL/ConPTY bridge,
+and Windows Terminal's rendering. To include a running server, pass
+`--socket /path/to/tmux/socket`; the probe creates and removes its own session
+and client without sending input to existing panes.
+
+The running-cat plugin stores activity and animation state in hidden tmux
+environment entries and refreshes only affected status lines. Updating tmux
+options for every key or animation frame causes full pane redraws, which can
+flood the terminal connection. The plugin also queries clients directly to
+avoid the command-string reference leak in older tmux `if-shell -F` versions.
+Run `python3 tmux/.config/tmux/plugins/tmux-runcat/tests/idle_memory.py` on Linux
+for a private-server idle memory check. Reload the rebuilt plugin to apply these
+fixes; existing sessions remain open. Previously leaked server memory stays
+allocated until the server exits, so stable RSS after reloading is the useful
+check. Do not restart the server while it holds unsaved running programs.
+
 ## Workspaces, recovery, and history
 
 Setup installs pinned Sesh and Atuin binaries and generates their Bash/Fish
