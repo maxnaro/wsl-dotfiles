@@ -1,14 +1,14 @@
 {
   "fzf": {
-    "version": "v0.74.5",
+    "version": "v0.75.0",
     "assets": {
       "x86_64": {
-        "url": "https://github.com/junegunn/fzf/releases/download/v0.74.5/fzf-0.74.5-linux_amd64.tar.gz",
-        "sha256": "d47d7f882972c7d674dbbba998ffa4116e68379616ffac7695d0671e9a722c5f"
+        "url": "https://github.com/junegunn/fzf/releases/download/v0.75.0/fzf-0.75.0-linux_amd64.tar.gz",
+        "sha256": "0d6640f83582d991cf429754baad64b07e3a4e439a6019670f4b91da1314141c"
       },
       "aarch64": {
-        "url": "https://github.com/junegunn/fzf/releases/download/v0.74.5/fzf-0.74.5-linux_arm64.tar.gz",
-        "sha256": "cf058001da21724a469b714a29cf4aab9cbe860d218a0d6c1b5b661efad7784c"
+        "url": "https://github.com/junegunn/fzf/releases/download/v0.75.0/fzf-0.75.0-linux_arm64.tar.gz",
+        "sha256": "bd0717badb6a5620387e014bb94209aac4d9eab6ab77b5348eabb0833aeb4d59"
       }
     }
   },
@@ -39,28 +39,28 @@
     }
   },
   "fastfetch": {
-    "version": "2.69.0",
+    "version": "2.71.0",
     "assets": {
       "x86_64": {
-        "url": "https://github.com/fastfetch-cli/fastfetch/releases/download/2.69.0/fastfetch-linux-amd64.tar.gz",
-        "sha256": "9fe880a34de3fec88e57a69230c02fd7be0846db3f3ea9f88f2b74489a79ff55"
+        "url": "https://github.com/fastfetch-cli/fastfetch/releases/download/2.71.0/fastfetch-linux-amd64.tar.gz",
+        "sha256": "abf5c99a3702cce8d3c7fa2cccd3ac205076ae0f2e45bced24a42a68821702d6"
       },
       "aarch64": {
-        "url": "https://github.com/fastfetch-cli/fastfetch/releases/download/2.69.0/fastfetch-linux-aarch64.tar.gz",
-        "sha256": "843a0d4e3d604efc7cce18df1efcc09b00a1960cfea9949118b50bf999694027"
+        "url": "https://github.com/fastfetch-cli/fastfetch/releases/download/2.71.0/fastfetch-linux-aarch64.tar.gz",
+        "sha256": "458248f2b3abab9c5e0a5b9df12cdcd1a966b355ddd5f3244a5eb47d17d33412"
       }
     }
   },
   "nvim": {
-    "version": "v0.11.6",
+    "version": "v0.12.6",
     "assets": {
       "x86_64": {
-        "url": "https://github.com/neovim/neovim/releases/download/v0.11.6/nvim-linux-x86_64.tar.gz",
-        "sha256": "2fc90b962327f73a78afbfb8203fd19db8db9cdf4ee5e2bef84704339add89cc"
+        "url": "https://github.com/neovim/neovim/releases/download/v0.12.6/nvim-linux-x86_64.tar.gz",
+        "sha256": "474430d53e6264f6d6dd18db42d6dc9df3a1b56ca9e88a325bbf860e1a811d87"
       },
       "aarch64": {
-        "url": "https://github.com/neovim/neovim/releases/download/v0.11.6/nvim-linux-arm64.tar.gz",
-        "sha256": "8ddc0c101846145e830b17bbca50782ca9307eee4fab539d9e2ddaf8793c06f1"
+        "url": "https://github.com/neovim/neovim/releases/download/v0.12.6/nvim-linux-arm64.tar.gz",
+        "sha256": "8f1f64a0bdb97247034038c3823c6cbad5bdf9ecd5751b85494b71c3ee04c815"
       }
     }
   },
@@ -78,15 +78,15 @@
     }
   },
   "lazygit": {
-    "version": "v0.66.1",
+    "version": "v0.66.3",
     "assets": {
       "x86_64": {
-        "url": "https://github.com/jesseduffield/lazygit/releases/download/v0.66.1/lazygit_0.66.1_linux_x86_64.tar.gz",
-        "sha256": "7b3f30c2c06a42cf575280f907e58d7ea08411408b6b62bc926bc91cbc6c3f46"
+        "url": "https://github.com/jesseduffield/lazygit/releases/download/v0.66.3/lazygit_0.66.3_linux_x86_64.tar.gz",
+        "sha256": "0a23f429a95f0d09db298b3c291536d818de066aa5a85c255806f0490ff6656b"
       },
       "aarch64": {
-        "url": "https://github.com/jesseduffield/lazygit/releases/download/v0.66.1/lazygit_0.66.1_linux_arm64.tar.gz",
-        "sha256": "add91327af13343f37d2d610512d0982ef5c75da5cc962b5159748adc8a11a86"
+        "url": "https://github.com/jesseduffield/lazygit/releases/download/v0.66.3/lazygit_0.66.3_linux_arm64.tar.gz",
+        "sha256": "ac0b48237f3d0283813e7154ec063237e519532feb0470c0881a1793ee78fd42"
       }
     }
   },
@@ -117,21 +117,21 @@
     }
   },
   "fzf-completion": {
-    "version": "v0.74.5",
+    "version": "v0.75.0",
     "file": "completion.bash",
     "assets": {
       "all": {
-        "url": "https://raw.githubusercontent.com/junegunn/fzf/v0.74.5/shell/completion.bash",
+        "url": "https://raw.githubusercontent.com/junegunn/fzf/v0.75.0/shell/completion.bash",
         "sha256": "263f7c4e602c002747175c69efa507bd3fb663633bb2419efda2e7641ffb6912"
       }
     }
   },
   "fzf-key-bindings": {
-    "version": "v0.74.5",
+    "version": "v0.75.0",
     "file": "key-bindings.bash",
     "assets": {
       "all": {
-        "url": "https://raw.githubusercontent.com/junegunn/fzf/v0.74.5/shell/key-bindings.bash",
+        "url": "https://raw.githubusercontent.com/junegunn/fzf/v0.75.0/shell/key-bindings.bash",
         "sha256": "89103adb2e29816b0ed8f36814ce4c95945a5f1c7dcd3b0620d2973ea2dbd6ea"
       }
     }
@@ -153,16 +153,23 @@
     }
   },
   "atuin": {
-    "version": "v18.24.4",
+    "version": "v18.24.6",
     "assets": {
       "x86_64": {
-        "url": "https://github.com/atuinsh/atuin/releases/download/v18.24.4/atuin-x86_64-unknown-linux-musl.tar.gz",
-        "sha256": "788cff5b3903ca7f1f5bdff3e4b4975c38b3c20385176a49b01ad1bea5b37636"
+        "url": "https://github.com/atuinsh/atuin/releases/download/v18.24.6/atuin-x86_64-unknown-linux-musl.tar.gz",
+        "sha256": "49b6e7a93cd6d8c77ee02bdb0eef0acff4c80ddaa0efb00c8179285771043698"
       },
       "aarch64": {
-        "url": "https://github.com/atuinsh/atuin/releases/download/v18.24.4/atuin-aarch64-unknown-linux-musl.tar.gz",
-        "sha256": "7698bd70195bde165bb37ea3133aa6663dd48ff7d6a23042cda2c7be4c22ba78"
+        "url": "https://github.com/atuinsh/atuin/releases/download/v18.24.6/atuin-aarch64-unknown-linux-musl.tar.gz",
+        "sha256": "0dcc72a06738f913040cdd990298a37d9ef062c8849026d0a3410d2def4c6bf7"
       }
+    }
+  },
+  "tmux": {
+    "version": "3.8",
+    "source": {
+      "url": "https://github.com/tmux/tmux/releases/download/3.8/tmux-3.8.tar.gz",
+      "sha256": "e79c699c7e949dccd0a4a125e17b8d1261e311b16979dbc8eb34542f3966d82e"
     }
   }
 }
