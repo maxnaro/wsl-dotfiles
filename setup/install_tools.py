@@ -26,7 +26,7 @@ def executable_candidates(directory, tool):
             continue
         with path.open('rb') as stream:
             header = stream.read(4)
-        if path.stat().st_mode & 0o111 or header.startswith((b'\x7fELF', b'#!')):
+        if path.stat().st_mode & 0o111 or header.startswith(b'\x7fELF'):
             matches.append(path)
     return matches
 

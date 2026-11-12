@@ -373,7 +373,7 @@ class Upgrades(unittest.TestCase):
         with tarfile.open(fileobj=stream, mode='w:gz') as package:
             for name, mode, payload in [
                     ('usr/bin/fastfetch', 0o755, b'#!/bin/sh\necho "fastfetch 2.0"\n'),
-                    ('usr/share/bash-completion/completions/fastfetch', 0o644, b'# bash completion fixture\n')]:
+                    ('usr/share/bash-completion/completions/fastfetch', 0o644, b'#!/usr/bin/env bash\n# bash completion fixture\n')]:
                 info = tarfile.TarInfo(name)
                 info.mode = mode
                 info.size = len(payload)
