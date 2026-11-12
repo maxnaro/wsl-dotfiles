@@ -3,6 +3,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import pwd
 import re
 import runpy
 import shutil
@@ -172,8 +173,15 @@ def notebook():
     # Molten writes its kernel connection file directly. A fresh CI home has not
     # run Jupyter yet, so its private runtime directory must exist first.
     from jupyter_core.paths import jupyter_runtime_dir
-    Path(jupyter_runtime_dir()).mkdir(parents=True, exist_ok=True, mode=0o700)
-    script = Path(os.environ['XDG_CONFIG_HOME']) / 'nvim/tests/jupyter.py'
+    home = Path.home().resolve()
+    config = Path(os.environ['XDG_CONFIG_HOME']).resolve()
+    runtime = Path(jupyter_runtime_dir()).resolve()
+    if (home == Path(pwd.getpwuid(os.getuid()).pw_dir).resolve()
+            or not runtime.is_relative_to(home) or not config.is_relative_to(home)):
+        raise ValueError('CI notebook check requires HOME, config, and runtime in an isolated home')
+    runtime.mkdir(parents=True, exist_ok=True, mode=0o700)
+    runtime.chmod(0o700)
+    script = config / 'nvim/tests/jupyter.py'
     try:
         runpy.run_path(str(script), run_name='__main__')
     except subprocess.TimeoutExpired as error:
