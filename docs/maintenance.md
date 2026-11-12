@@ -38,8 +38,11 @@ On Ubuntu, prepare the tmux build dependencies once:
 
 ```bash
 sudo apt-get update
-sudo apt-get install --no-install-recommends build-essential libevent-dev libncurses-dev pkg-config
+sudo apt-get install --no-install-recommends build-essential bison libevent-dev libncurses-dev pkg-config
 ```
+
+Run `./setup.sh --upgrade tmux` as your normal user, without sudo. The installer
+uses the current user's home; running it with sudo targets `/root/.local`.
 
 Downloads, checksum checks, source builds, executable version checks, completions,
 and Atuin data compatibility checks finish before activation. Packages install

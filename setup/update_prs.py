@@ -27,7 +27,8 @@ class GitHub:
         self.repo = repo
 
     def api(self, endpoint, method='GET', data=None):
-        command = ['gh', 'api', '-X', method, f'repos/{self.repo}/{endpoint}']
+        path = f'repos/{self.repo}' + (f'/{endpoint}' if endpoint else '')
+        command = ['gh', 'api', '-X', method, path]
         if data is not None:
             command += ['--input', '-']
         result = subprocess.run(command, input=json.dumps(data) if data is not None else None,

@@ -207,6 +207,8 @@ def preflight_tmux():
     for command in ('cc', 'make', 'pkg-config'):
         if not shutil.which(command):
             raise RuntimeError(f'tmux build needs {command}; install system build prerequisites first')
+    if not any(shutil.which(command) for command in ('bison', 'byacc', 'yacc')):
+        raise RuntimeError('tmux build needs yacc; on Ubuntu install bison with sudo apt-get install bison')
     for library in ('libevent', 'ncurses'):
         result = subprocess.run(['pkg-config', '--exists', library], check=False)
         if result.returncode:

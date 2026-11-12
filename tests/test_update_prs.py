@@ -3,6 +3,7 @@ import copy
 import importlib.util
 from pathlib import Path
 import sys
+import subprocess
 import unittest
 from unittest.mock import patch
 
@@ -17,6 +18,15 @@ HEAD = 'a' * 40
 BASE = 'b' * 40
 BASE_MANIFEST = {'nvim': {'version': 'v0.11.5', 'assets': {}}}
 HEAD_MANIFEST = {'nvim': {'version': 'v0.11.6', 'assets': {}}}
+
+
+class GitHubRequests(unittest.TestCase):
+    def test_repository_endpoint_has_no_trailing_slash(self):
+        for endpoint, expected in (('', 'repos/owner/repo'), ('git/ref/heads/main', 'repos/owner/repo/git/ref/heads/main')):
+            with self.subTest(endpoint=endpoint), patch.object(updater.subprocess, 'run', return_value=
+                    subprocess.CompletedProcess([], 0, stdout='{}')) as run:
+                updater.GitHub(REPO).api(endpoint)
+                self.assertEqual(run.call_args.args[0], ['gh', 'api', '-X', 'GET', expected])
 
 
 def pull():

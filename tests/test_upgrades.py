@@ -206,6 +206,24 @@ class Upgrades(unittest.TestCase):
                 self.upgrade('tmux')
             download.assert_not_called()
 
+    def test_tmux_missing_yacc_fails_before_download(self):
+        self.manifest['tmux'] = {'version': '3.8', 'source': {'url': 'tmux', 'sha256': '0' * 64}}
+        def which(command):
+            return '/usr/bin/' + command if command in ('cc', 'make', 'pkg-config') else None
+        for dry_run in (False, True):
+            with self.subTest(dry_run=dry_run), patch.object(upgrades.shutil, 'which', side_effect=which), patch.object(self, 'download') as download:
+                with self.assertRaisesRegex(RuntimeError, 'tmux build needs yacc.*install bison'):
+                    self.upgrade('tmux', dry_run=dry_run)
+                download.assert_not_called()
+
+    def test_tmux_preflight_accepts_yacc_providers(self):
+        for provider in ('bison', 'byacc', 'yacc'):
+            def which(command):
+                return '/usr/bin/' + command if command in ('cc', 'make', 'pkg-config', provider) else None
+            with self.subTest(provider=provider), patch.object(upgrades.shutil, 'which', side_effect=which), patch.object(
+                    upgrades.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0)):
+                upgrades.preflight_tmux()
+
     def test_tmux_build_failure_keeps_target(self):
         self.old('tmux', '3.7')
         stream = io.BytesIO()
