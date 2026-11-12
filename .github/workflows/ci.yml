@@ -1,0 +1,100 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  candidate:
+    name: candidate (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: x86_64
+          - runner: ubuntu-24.04-arm
+            arch: aarch64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, verified official tag
+        with:
+          persist-credentials: false
+      - name: Initialize public submodules over HTTPS
+        run: |
+          git config --global url.https://github.com/.insteadOf git@github.com:
+          git submodule update --init --recursive
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Install system build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential bison pkg-config libevent-dev libncurses-dev libutf8proc-dev python3-venv
+      - name: Cache pinned build inputs
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-${{ runner.os }}-${{ matrix.arch }}-${{ hashFiles('**/Cargo.lock', 'setup/tools.json') }}
+      - name: Build tmux plugins without fonts
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup run stable cargo build --release --locked --manifest-path tmux/.config/tmux/plugins/tmux-prefix-help/Cargo.toml
+          rustup run stable cargo build --release --locked --offline --manifest-path tmux/.config/tmux/plugins/tmux-runcat/Cargo.toml
+      - name: Install exact candidate tools into isolated home
+        run: python setup/ci_checks.py prepare --home "$RUNNER_TEMP/candidate-home"
+      - name: Unit, shell startup, and shell syntax checks
+        run: |
+          python -m unittest discover -s tests -p 'test_*.py' -v
+          python setup/ci_checks.py syntax
+      - name: Private tmux integration checks
+        run: |
+          python tests/live_prefix_help.py
+          python tests/live_tmux_theme.py
+          python tests/live_recovery.py
+          python tmux/.config/tmux/plugins/tmux-runcat/tests/live_tmux.py
+          python tmux/.config/tmux/plugins/tmux-runcat/tests/roaming_tmux.py
+          python tmux/.config/tmux/plugins/tmux-runcat/tests/idle_memory.py
+      - name: Restore locked Neovim plugins
+        run: python setup/ci_checks.py plugins
+      - name: Neovim theme and notebook checks
+        run: |
+          bash "$XDG_CONFIG_HOME/nvim/scripts/setup-jupyter.sh"
+          nvim --headless '+UpdateRemotePlugins' '+qa!'
+          python tests/live_theme.py
+          "$XDG_DATA_HOME/nvim/jupyter/bin/python" "$XDG_CONFIG_HOME/nvim/tests/jupyter.py"
+      - name: Record terminal performance without timing thresholds
+        run: |
+          mkdir -p "$RUNNER_TEMP/performance"
+          python tests/live_terminal_latency.py --samples 80 > "$RUNNER_TEMP/performance/terminal-${{ matrix.arch }}.jsonl"
+      - name: Upload performance evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: performance-${{ matrix.arch }}
+          path: ${{ runner.temp }}/performance
+          if-no-files-found: warn
+          retention-days: 14
+  ci:
+    name: ci
+    if: always()
+    needs: [candidate]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require every candidate job
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          results = json.loads(os.environ['RESULTS'])
+          assert results and all(job['result'] == 'success' for job in results.values()), results
+          PY

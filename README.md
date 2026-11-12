@@ -49,6 +49,29 @@ cd ~/dotfiles
 source ~/.bashrc
 ```
 
+### Upgrading existing tools
+
+Ordinary setup preserves installed executables. Explicit upgrades use the pinned
+manifest, validate every selected candidate, and keep a rollback transaction:
+
+```bash
+./setup.sh --upgrade tmux lazygit atuin fzf nvim fastfetch --dry-run
+./setup.sh --upgrade tmux lazygit atuin fzf nvim fastfetch
+./setup.sh --rollback TRANSACTION_ID
+```
+
+Tmux builds from official source into your home directory. Its system build
+prerequisites are `build-essential`, `libevent-dev`, `libncurses-dev`, and
+`pkg-config` on Ubuntu. The installer does not invoke sudo. Existing shells,
+editors, and tmux servers keep running their loaded versions.
+
+GitHub Actions tests exact pinned candidates on x86_64 and ARM64. The release
+updater checks weekly and creates one PR per tool. Once its dedicated GitHub App
+and merge protection are configured, passing patch updates can merge
+automatically. Laptop upgrades remain explicit. See
+[upgrade and automation maintenance](docs/maintenance.md#explicit-upgrades-and-rollback)
+for prerequisites, rollback, and App setup.
+
 ### What `setup.sh` does:
 
 Initializes Git submodules before installing tools or linking configuration.
