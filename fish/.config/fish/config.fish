@@ -16,6 +16,9 @@ end
 fish_add_path --path ~/.local/bin
 fish_add_path --path (test -n "$GOPATH"; and echo "$GOPATH/bin"; or echo "$HOME/go/bin")
 
+set -l vscode "/mnt/c/Users/MaxNarongchai/AppData/Local/Programs/Microsoft VS Code/bin"
+test -d $vscode; and fish_add_path --path --append $vscode
+
 # Pyenv
 if test -d "$HOME/.pyenv/bin"
     fish_add_path --path "$HOME/.pyenv/shims" "$HOME/.pyenv/bin"
