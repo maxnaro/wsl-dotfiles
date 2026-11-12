@@ -1,5 +1,6 @@
 """Install missing pinned tools; never overwrite working executables."""
 import hashlib
+import argparse
 import json
 import os
 from pathlib import Path
@@ -17,7 +18,30 @@ def download(asset, destination):
         raise ValueError(f"Checksum mismatch: {asset['url']}")
 
 
+def executable_candidates(directory, tool):
+    """Ignore documentation and completion files sharing an executable's name."""
+    matches = []
+    for path in directory.rglob(tool):
+        if not path.is_file():
+            continue
+        with path.open('rb') as stream:
+            header = stream.read(4)
+        if path.stat().st_mode & 0o111 or header.startswith((b'\x7fELF', b'#!')):
+            matches.append(path)
+    return matches
+
+
 def install(tool, spec, arch, home):
+    if tool in ('fzf-completion', 'fzf-key-bindings'):
+        fzf = shutil.which('fzf')
+        local_fzf = home / '.local/bin/fzf'
+        if not fzf and os.access(local_fzf, os.X_OK):
+            fzf = str(local_fzf)
+        result = subprocess.run([fzf, '--version'], capture_output=True, text=True) if fzf else None
+        actual = result.stdout.split()[0].removeprefix('v') if result and result.returncode == 0 and result.stdout.split() else None
+        if actual != spec['version'].removeprefix('v'):
+            print(f'Keeping existing {tool}: fzf version {actual or "unavailable"} differs from pin {spec["version"]}')
+            return
     existing = shutil.which(tool)
     target = home / '.local/bin' / tool
     if existing or os.access(target, os.X_OK):
@@ -42,7 +66,7 @@ def install(tool, spec, arch, home):
         extracted = stage / 'extracted'
         with tarfile.open(archive) as package:
             package.extractall(extracted, filter='data')
-        matches = [p for p in extracted.rglob(tool) if p.is_file()]
+        matches = executable_candidates(extracted, tool)
         if len(matches) != 1:
             raise ValueError(f'Expected one {tool} executable, found {len(matches)}')
         binary = matches[0]
@@ -62,13 +86,28 @@ def install(tool, spec, arch, home):
         print(f'Installed {tool} {spec["version"]}')
 
 
-def main():
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--upgrade', nargs='+', metavar='TOOL')
+    mode.add_argument('--rollback', metavar='ID')
+    parser.add_argument('--dry-run', action='store_true')
+    args = parser.parse_args(argv)
+    if args.dry_run and not args.upgrade:
+        parser.error('--dry-run requires --upgrade TOOL...')
     arch = {'amd64': 'x86_64', 'arm64': 'aarch64'}.get(platform.machine(), platform.machine())
     if platform.system() != 'Linux' or arch not in ('x86_64', 'aarch64'):
         raise ValueError('Only Linux x86_64 and aarch64 are supported')
     manifest = json.loads(Path(__file__).with_name('tools.json').read_text())
+    if args.upgrade or args.rollback:
+        from upgrades import upgrade, rollback
+        if args.rollback:
+            rollback(args.rollback, Path.home())
+        else:
+            upgrade(args.upgrade, manifest, arch, Path.home(), download, args.dry_run)
+        return
     for tool, spec in manifest.items():
-        if tool == 'pokemon':
+        if tool == 'pokemon' or 'source' in spec:
             continue
         try:
             install(tool, spec, arch, Path.home())
