@@ -41,6 +41,8 @@ class FixtureAPI:
         self.commits = [{'author': {'login': BOT}, 'committer': {'login': BOT}}]
         self.jobs = [{'name': 'ci', 'conclusion': 'success'}]
         self.calls = []
+        self.merge_result = {'merged': True}
+        self.merge_failure = None
 
     def api(self, endpoint, method='GET', data=None):
         self.calls.append((endpoint, method, data))
@@ -52,6 +54,10 @@ class FixtureAPI:
             return {'object': {'sha': BASE}}
         if endpoint.startswith('compare/'):
             return {'merge_base_commit': {'sha': BASE}}
+        if endpoint == 'pulls/12/merge' and method == 'PUT':
+            if self.merge_failure:
+                raise self.merge_failure
+            return self.merge_result
         if endpoint == 'pulls/12':
             return self.pr
         raise AssertionError(endpoint)
@@ -124,13 +130,14 @@ class UpdatePRPolicy(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'strict'):
                     updater.verify_candidate(BASE_MANIFEST, HEAD_MANIFEST, 'nvim')
 
-    def test_merge_uses_immutable_expected_head(self):
+    def test_merge_uses_immediate_api_with_immutable_expected_head(self):
         api = FixtureAPI()
-        with patch.object(updater, 'verify_candidate') as verify, patch.object(updater.subprocess, 'run') as run:
+        with patch.object(updater, 'verify_candidate') as verify, patch.object(updater, 'publish') as publish:
             updater.merge(api, BOT, 1)
         verify.assert_called_once_with(BASE_MANIFEST, HEAD_MANIFEST, 'nvim')
-        run.assert_called_once_with(['gh', 'pr', 'merge', '12', '--repo', REPO, '--squash',
-                                     '--match-head-commit', HEAD], check=True)
+        mutations = [call for call in api.calls if call[1] != 'GET']
+        self.assertEqual(mutations, [('pulls/12/merge', 'PUT', {'sha': HEAD, 'merge_method': 'squash'})])
+        publish.assert_called_once_with(api, BOT)
 
     def test_repository_auto_merge_opt_out_stops_immediate_bot_merges(self):
         api = FixtureAPI()
@@ -147,16 +154,17 @@ class UpdatePRPolicy(unittest.TestCase):
             run.assert_not_called()
 
     def test_pending_remote_gate_fails_without_arming_auto_merge(self):
-        api = FixtureAPI()
-        failure = updater.subprocess.CalledProcessError(1, ['gh', 'pr', 'merge'])
-        with patch.object(updater, 'verify_candidate'), patch.object(updater, 'publish') as publish, \
-             patch.object(updater.subprocess, 'run', side_effect=failure) as run:
-            with self.assertRaises(updater.subprocess.CalledProcessError):
-                updater.merge(api, BOT, 1)
-            self.assertEqual(run.call_count, 1)
-            self.assertNotIn('--auto', run.call_args.args[0])
-            self.assertIn('--match-head-commit', run.call_args.args[0])
-            publish.assert_not_called()
+        for failure in (None, updater.subprocess.CalledProcessError(1, ['gh', 'api'])):
+            api = FixtureAPI()
+            api.merge_result = {'merged': False, 'message': 'Required gate is pending'}
+            api.merge_failure = failure
+            with patch.object(updater, 'verify_candidate'), patch.object(updater, 'publish') as publish:
+                expected_error = updater.subprocess.CalledProcessError if failure else ValueError
+                with self.assertRaises(expected_error):
+                    updater.merge(api, BOT, 1)
+                mutations = [call for call in api.calls if call[1] != 'GET']
+                self.assertEqual(mutations, [('pulls/12/merge', 'PUT', {'sha': HEAD, 'merge_method': 'squash'})])
+                publish.assert_not_called()
 
     def test_merge_rejects_nonbot_run_actor_or_failed_aggregate(self):
         for mutate in (lambda api: api.run.update(actor={'login': 'human'}),
@@ -168,6 +176,7 @@ class UpdatePRPolicy(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     updater.merge(api, BOT, 1)
                 run.assert_not_called()
+                self.assertTrue(all(method == 'GET' for _, method, _ in api.calls))
 
     def test_outdated_ci_or_modified_branch_never_attempts_merge(self):
         for mutate in (lambda api: api.run.update(head_sha=BASE),
@@ -177,6 +186,7 @@ class UpdatePRPolicy(unittest.TestCase):
             with patch.object(updater.subprocess, 'run') as run:
                 updater.merge(api, BOT, 1)
                 run.assert_not_called()
+                self.assertTrue(all(method == 'GET' for _, method, _ in api.calls))
 
     def test_stale_main_refreshes_without_merging_old_ci(self):
         api = FixtureAPI()

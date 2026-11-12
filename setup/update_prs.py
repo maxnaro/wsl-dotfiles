@@ -212,11 +212,11 @@ def merge(api, bot_login, run_id):
             print(f'PR #{number}: main advanced during verification; refreshing candidate CI')
             publish(api, bot_login)
             return
-        # Merge immediately or fail; never arm a persistent queue for future heads.
-        subprocess.run(['gh', 'pr', 'merge', str(number), '--repo', api.repo, '--squash',
-                        '--match-head-commit', sha], check=True)
-        if api.api(f'pulls/{number}').get('merged'):
-            publish(api, bot_login)
+        # REST merges immediately or fails, including on repositories with merge queues.
+        result = api.api(f'pulls/{number}/merge', 'PUT', {'sha': sha, 'merge_method': 'squash'})
+        if result.get('merged') is not True:
+            raise ValueError('GitHub did not confirm an immediate merge of the verified head')
+        publish(api, bot_login)
 
 
 def main():

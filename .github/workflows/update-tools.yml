@@ -15,8 +15,9 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: update-tools
+  group: tool-updates
   cancel-in-progress: false
+  queue: max
 jobs:
   discover:
     runs-on: ubuntu-24.04
