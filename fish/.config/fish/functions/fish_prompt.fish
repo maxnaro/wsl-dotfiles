@@ -19,6 +19,22 @@ function fish_prompt
     echo ""
     echo -s "$cyan" (prompt_pwd -d 0) "$normal" "$git_info"
 
+    # Match Neovim's compact, transparent mode indicator.
+    set -l mode_label N
+    set -l mode_color cyan
+    switch $fish_bind_mode
+        case insert
+            set mode_label I
+            set mode_color green
+        case visual
+            set mode_label V
+            set mode_color magenta
+        case replace replace_one
+            set mode_label R
+            set mode_color red
+    end
+    echo -n -s (set_color $mode_color) "$mode_label " (set_color normal)
+
     # Second line: Symbol ❯ (cyan or red on error)
     if test $command_status -eq 0
         echo -n -s (set_color cyan) "❯ " (set_color normal)

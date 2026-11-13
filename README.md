@@ -384,3 +384,15 @@ live JSON. Restore by copying the desired backup over `settings.json`, then run
 also available for a complete manual restore on this machine. JSONC is accepted;
 comments and formatting are normalized on write. Invalid JSON leaves the file intact.
 Linux installations without Windows Terminal apply the WSL themes normally.
+
+### Fish Vim editing
+
+Fish starts each command in Insert mode. Escape enters Normal mode; use
+`h/j/k/l`, word motions, `d`/`c` operators, `v` for selection, `u` for undo,
+and Ctrl-R for redo. `i` or `a` returns to Insert mode. Ctrl-R in Insert mode
+opens Atuin history search.
+
+The second prompt line shows Neovim-style `N`, `I`, `V`, or `R` labels using
+the shared terminal palette. Cursor shapes distinguish Normal/Visual (block),
+Insert (bar), and Replace (underline). Failed commands retain a red prompt
+symbol. Open a new Fish session to activate these changes.
