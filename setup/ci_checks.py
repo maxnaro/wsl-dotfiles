@@ -45,13 +45,12 @@ def prepare(home):
             raise AssertionError(f'{tool}: expected {version}, got {output!r}')
         if Path(shutil.which(tool, path=env['PATH'])).resolve() != (home / '.local/bin' / tool).resolve():
             raise AssertionError(f'{tool}: PATH does not select the candidate binary')
-    for package in ('fish', 'tmux', 'atuin', 'lazygit'):
-        source = ROOT / package / '.config' / package
-        destination = home / '.config' / package
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.symlink_to(source, target_is_directory=True)
-    for name in ('.bashrc', '.bash_aliases', '.inputrc'):
-        (home / name).symlink_to(ROOT / 'bash' / name)
+    # Exercise the same per-file shell links as setup without linking Fish state.
+    run(sys.executable, ROOT / 'setup/link_shell.py', ROOT / 'modules/shell', home)
+    tmux = home / '.config/tmux'
+    tmux.symlink_to(ROOT / 'tmux/.config/tmux', target_is_directory=True)
+    atuin_themes = home / '.config/atuin/themes'
+    atuin_themes.symlink_to(ROOT / 'modules/theme/atuin/.config/atuin/themes', target_is_directory=True)
     (home / '.config/nvim').mkdir()
     shutil.copytree(ROOT / 'nvim/.config/nvim', home / '.config/nvim', dirs_exist_ok=True,
                     ignore=shutil.ignore_patterns('.git'))

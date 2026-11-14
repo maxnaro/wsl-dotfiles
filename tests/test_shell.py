@@ -44,7 +44,12 @@ class ShellStartup(unittest.TestCase):
             home = Path(tmp)
             (home/'bin').mkdir()
             (home/'.config').mkdir()
-            (home/'.config/fish').symlink_to(ROOT/'fish/.config/fish')
+            fish_config = home/'.config/fish'
+            fish_config.mkdir()
+            for source in (ROOT/'fish/.config/fish').rglob('*.fish'):
+                target = fish_config/source.relative_to(ROOT/'fish/.config/fish')
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.symlink_to(source)
             tmux = home/'bin/tmux'
             tmux.write_text('#!/bin/sh\necho "$1" >> "$HOME/tmux-log"\n[ "$1" != has-session ] || [ "$MOCK_SERVER" = 1 ]\n')
             tmux.chmod(0o755)

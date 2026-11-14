@@ -6,32 +6,15 @@ My personal WSL / Linux configuration files, styled with CachyOS terminal utilit
 
 ```text
 dotfiles/
-├── bash/
-│   ├── .bashrc
-│   ├── .bash_aliases
-│   └── .inputrc
-├── fish/
-│   └── .config/
-│       └── fish/
-│           ├── config.fish
-│           ├── functions/
-│           └── conf.d/
-├── git/
-│   └── .gitconfig
-├── nvim/
-│   └── .config/
-│       └── nvim/                         # Git submodule (maxnaro/nvim-config)
-├── tmux/
-│   └── .config/
-│       └── tmux/
-│           ├── tmux.conf
-│           ├── plugins/tmux-prefix-help/  # Git submodule
-│           └── plugins/tmux-runcat/       # Git submodule
-├── scripts/
-│   └── .scripts/
-│       └── auto_venv.sh
-├── setup.sh
-└── README.md
+├── modules/shell/       # Shared Bash, Fish, helpers, Atuin and LazyGit
+├── modules/theme/       # Shared palette, theme installer and Windows Terminal
+├── bash, fish, lazygit/ # Compatibility links to modules/shell
+├── themes/              # Compatibility link to modules/theme/themes
+├── windows-terminal/    # Compatibility link to modules/theme/windows-terminal
+├── nvim/.config/nvim/   # Neovim submodule
+├── tmux/                # Shared tmux submodule
+├── setup/               # Tool management and shell manifest installer
+└── setup.sh
 ```
 
 ## Quick Start (New Machine / WSL Installation)
@@ -87,27 +70,14 @@ It also builds the Rust `tmux-runcat` plugin and installs its bundled fonts.
    - `bash/.bashrc` -> `~/.bashrc`
    - `bash/.bash_aliases` -> `~/.bash_aliases`
    - `bash/.inputrc` -> `~/.inputrc`
-   - `fish/.config/fish` -> `~/.config/fish`
+   - Fish configuration files individually -> `~/.config/fish/` (Fish state stays in a real directory)
    - `git/.gitconfig` -> `~/.gitconfig`
    - `scripts/.scripts/auto_venv.sh` -> `~/.scripts/auto_venv.sh`
    - `nvim/.config/nvim` -> `~/.config/nvim`
    - `tmux/.config/tmux` -> `~/.config/tmux`
 4. Creates automatic `.bak` backups if any files already exist in your home directory before linking.
 
-### (Optional) GNU Stow
-
-If you prefer using `stow`:
-```bash
-cd ~/dotfiles
-stow -R bash
-stow -R fish
-stow -R git
-stow -R lazygit
-stow -R scripts
-stow -R nvim
-stow -R tmux
-stow -R --no-folding codex
-```
+Shell files are selected from `modules/shell/manifest.json`. Existing Fish directory links are migrated to a real directory, preserving local files and universal-variable state. Use `setup.sh` for shell installation; do not Stow the Fish directory as a whole.
 
 ### Codex and Claude Code delegation preference
 
@@ -260,7 +230,7 @@ shared terminal palette. Buffer tabs are disabled; native tab pages remain avail
 then quits from the top level; `q` also quits. Existing leader shortcuts remain.
 
 Setup links `lazygit/.config/lazygit/config.yml` to `~/.config/lazygit/config.yml`,
-backing up an existing file. For an existing installation, use `stow -R lazygit`
+backing up an existing file. For an existing installation, rerun `./setup.sh`
 after moving any existing LazyGit config aside. Restart Neovim and LazyGit to
 load their changes; reload tmux with `tmux source-file ~/.config/tmux/tmux.conf`.
 

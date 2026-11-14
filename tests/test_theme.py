@@ -265,6 +265,7 @@ class Theme(unittest.TestCase):
                  unittest.mock.patch.object(command, 'preflight', side_effect=lambda *args: events.append('preflight')), \
                  unittest.mock.patch.object(command, 'windows', side_effect=lambda *args: events.append('windows')), \
                  unittest.mock.patch.object(command, 'apps', side_effect=lambda *args: events.append('apps') or True), \
+                 unittest.mock.patch.object(command, 'desktop_apply'), \
                  unittest.mock.patch.object(command, 'reload_tmux', side_effect=lambda: events.append('reload')), \
                  unittest.mock.patch.object(command.sys, 'argv', ['dotfiles-theme', 'light']), \
                  unittest.mock.patch('builtins.print', side_effect=record_print):

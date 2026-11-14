@@ -130,8 +130,9 @@ Interactive Bash starts Fish when available. Use `DOTFILES_NO_FISH=1 bash` for
 Bash fallback. Missing optional Rust/NVM/Pyenv files do not prevent startup.
 
 Use `~/.bashrc.local` and `~/.config/fish/local.fish` for machine settings. They are
-optional. The Fish override and generated `fish_variables` file are ignored by
-Git. Existing universal variables remain on disk when tracking is removed.
+optional. Fish configuration files are linked individually; the Fish directory and
+its generated `fish_variables` remain local. Existing linked Fish directories are
+migrated while preserving their contents.
 Fish uses session PATH modifications rather than persisting new universal paths.
 
 Only WSL sessions filter mounted Windows paths. A VS Code directory already on
@@ -142,7 +143,8 @@ override file. No Windows username is assumed.
 
 Run `python3 -m unittest discover -s tests`, `bash -n setup.sh bash/.bashrc
 bash/.bash_aliases scripts/.scripts/auto_venv.sh`, and `fish -n` on the tracked
-Fish scripts. Tests use temporary homes and mocked downloads and do not execute
+Fish scripts, plus `python3 -m unittest discover -s modules/shell/tests` and
+`python3 -m unittest discover -s modules/theme/tests`. Tests use temporary homes and mocked downloads and do not execute
 the real full setup. Release metadata has been verified for both architectures;
 ARM64 binaries still require a real ARM64 machine for execution validation.
 
