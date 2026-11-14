@@ -149,14 +149,8 @@ link_file() {
     success "Linked $dst -> $src"
 }
 
-# Link bash configuration
-link_file "$DOTFILES_DIR/atuin/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml"
-
-link_file "$DOTFILES_DIR/bash/.bashrc" "$HOME/.bashrc"
-link_file "$DOTFILES_DIR/bash/.bash_aliases" "$HOME/.bash_aliases"
-if [ -f "$DOTFILES_DIR/bash/.inputrc" ]; then
-    link_file "$DOTFILES_DIR/bash/.inputrc" "$HOME/.inputrc"
-fi
+# Install individual shell files; keep Fish's state and local overrides in place.
+python3 "$DOTFILES_DIR/setup/link_shell.py" "$DOTFILES_DIR/modules/shell" "$HOME"
 
 # Link global Codex delegation instructions
 link_file "$DOTFILES_DIR/codex/.codex/AGENTS.md" "${CODEX_HOME:-$HOME/.codex}/AGENTS.md"
@@ -169,24 +163,9 @@ if [ -f "$DOTFILES_DIR/git/.gitconfig" ]; then
     link_file "$DOTFILES_DIR/git/.gitconfig" "$HOME/.gitconfig"
 fi
 
-# Link helper scripts (.scripts/)
-if [ -f "$DOTFILES_DIR/scripts/.scripts/auto_venv.sh" ]; then
-    link_file "$DOTFILES_DIR/scripts/.scripts/auto_venv.sh" "$HOME/.scripts/auto_venv.sh"
-fi
-
-link_file "$DOTFILES_DIR/scripts/.scripts/zoxide-add.sh" "$HOME/.scripts/zoxide-add.sh"
-
-# Link LazyGit configuration
-link_file "$DOTFILES_DIR/lazygit/.config/lazygit/config.yml" "$HOME/.config/lazygit/config.yml"
-
 # Link Neovim configuration (~/.config/nvim)
 if [ -d "$DOTFILES_DIR/nvim/.config/nvim" ]; then
     link_file "$DOTFILES_DIR/nvim/.config/nvim" "$HOME/.config/nvim"
-fi
-
-# Link Fish configuration (~/.config/fish)
-if [ -d "$DOTFILES_DIR/fish/.config/fish" ]; then
-    link_file "$DOTFILES_DIR/fish/.config/fish" "$HOME/.config/fish"
 fi
 
 # Link Tmux configuration (~/.config/tmux)
@@ -195,13 +174,6 @@ if [ -d "$DOTFILES_DIR/tmux/.config/tmux" ]; then
 fi
 
 bash "$DOTFILES_DIR/themes/install.sh"
-
-# -----------------------------------------------------------------------------
-# 3. Optional: GNU Stow support
-# -----------------------------------------------------------------------------
-if command -v stow >/dev/null 2>&1; then
-    info "GNU Stow detected. You can also run 'stow bash', 'stow git', 'stow scripts', 'stow nvim', 'stow fish', 'stow lazygit', or 'stow tmux' inside $DOTFILES_DIR"
-fi
 
 echo ""
 success "Setup complete! Run 'source ~/.bashrc' or restart your terminal."

@@ -62,7 +62,7 @@ class Installation(unittest.TestCase):
 
     def test_links_preserve_backups_and_restore_on_failure(self):
         setup = (ROOT / 'setup.sh').read_text()
-        function = setup[setup.index('link_file() {'):setup.index('# Link bash configuration')]
+        function = setup[setup.index('link_file() {'):setup.index('# Install individual shell files')]
         with tempfile.TemporaryDirectory() as tmp:
             result = subprocess.run(['bash', '-eu', '-c', '''
                 success() { :; }; warn() { :; }
@@ -85,9 +85,6 @@ class Installation(unittest.TestCase):
             self.assertEqual(len(backups), 2)
             self.assertTrue(any(p.is_symlink() for p in backups))
 
-    def test_failed_cd_retains_status(self):
-        result = subprocess.run(['bash', '-c', 'source "$1"; auto_venv_cd /nonexistent/dotfiles-test', 'test', str(ROOT/'scripts/.scripts/auto_venv.sh')], capture_output=True)
-        self.assertNotEqual(result.returncode, 0)
 
 
 if __name__ == '__main__':

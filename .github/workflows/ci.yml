@@ -54,6 +54,8 @@ jobs:
       - name: Unit, shell startup, and shell syntax checks
         run: |
           python -m unittest discover -s tests -p 'test_*.py' -v
+          python -m unittest discover -s modules/shell/tests -p 'test_*.py' -v
+          python -m unittest discover -s modules/theme/tests -p 'test_*.py' -v
           python setup/ci_checks.py syntax
           python setup/ci_checks.py smoke
       - name: Private tmux integration checks

@@ -1,15 +1,12 @@
-[submodule "tmux/.config/tmux/plugins/tmux-prefix-help"]
-	path = tmux/.config/tmux/plugins/tmux-prefix-help
-	url = git@github.com:maxnaro/tmux-prefix-help.git
-[submodule "tmux/.config/tmux/plugins/tmux-runcat"]
-	path = tmux/.config/tmux/plugins/tmux-runcat
-	url = git@github.com:maxnaro/tmux-runcat.git
-[submodule "tmux/.config/tmux/plugins/tmux-resurrect"]
-	path = tmux/.config/tmux/plugins/tmux-resurrect
-	url = https://github.com/tmux-plugins/tmux-resurrect.git
-[submodule "tmux/.config/tmux/plugins/tmux-continuum"]
-	path = tmux/.config/tmux/plugins/tmux-continuum
-	url = https://github.com/tmux-plugins/tmux-continuum.git
 [submodule "nvim/.config/nvim"]
 	path = nvim/.config/nvim
-	url = git@github.com:maxnaro/nvim-config.git
+	url = https://github.com/maxnaro/nvim-config.git
+[submodule "modules/theme"]
+	path = modules/theme
+	url = https://github.com/maxnaro/dotfiles-theme.git
+[submodule "modules/shell"]
+	path = modules/shell
+	url = https://github.com/maxnaro/dotfiles-shell.git
+[submodule "shared-tmux"]
+	path = tmux/.config/tmux
+	url = https://github.com/maxnaro/dotfiles-tmux.git
