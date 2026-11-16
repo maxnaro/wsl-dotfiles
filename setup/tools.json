@@ -153,15 +153,15 @@
     }
   },
   "atuin": {
-    "version": "v18.24.6",
+    "version": "v18.24.8",
     "assets": {
       "x86_64": {
-        "url": "https://github.com/atuinsh/atuin/releases/download/v18.24.6/atuin-x86_64-unknown-linux-musl.tar.gz",
-        "sha256": "49b6e7a93cd6d8c77ee02bdb0eef0acff4c80ddaa0efb00c8179285771043698"
+        "url": "https://github.com/atuinsh/atuin/releases/download/v18.24.8/atuin-x86_64-unknown-linux-musl.tar.gz",
+        "sha256": "f8dfc3f9d27cadc2e2c9d489394ef7c568291e2382a4d184865701bf1a4ac30a"
       },
       "aarch64": {
-        "url": "https://github.com/atuinsh/atuin/releases/download/v18.24.6/atuin-aarch64-unknown-linux-musl.tar.gz",
-        "sha256": "0dcc72a06738f913040cdd990298a37d9ef062c8849026d0a3410d2def4c6bf7"
+        "url": "https://github.com/atuinsh/atuin/releases/download/v18.24.8/atuin-aarch64-unknown-linux-musl.tar.gz",
+        "sha256": "e058ab045e9a694e709a23fb87bb55a8737e98dfda9752cb33ea5e9f70c32a13"
       }
     }
   },
