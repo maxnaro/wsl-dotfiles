@@ -105,10 +105,9 @@ export PATH="$HOME/.local/bin:$PATH"
 # Go bin PATH (Static path avoids slow 'go env GOPATH' subshell execution)
 export PATH="${GOPATH:-$HOME/go}/bin:$PATH"
 
-
 # Deduplicate PATH and retain VS Code when filtering WSL mount paths.
 _clean_path=
-IFS=: read -ra _path_entries <<< "$PATH"
+IFS=: read -ra _path_entries <<<"$PATH"
 for _entry in "${_path_entries[@]}"; do
   case $_entry in /mnt/*) [[ -z ${WSL_DISTRO_NAME:-} || $_entry == */Microsoft\ VS\ Code/bin ]] || continue ;; esac
   [[ :$_clean_path: == *:"$_entry":* ]] || _clean_path=${_clean_path:+$_clean_path:}$_entry
@@ -138,18 +137,18 @@ _load_nvm() {
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 }
 if [[ -s "$NVM_DIR/nvm.sh" ]]; then
-for _nvm_cmd in nvm node npm npx pnpm yarn; do
-  eval "$_nvm_cmd() { _load_nvm; \"$_nvm_cmd\" \"\$@\"; }"
-done
-unset _nvm_cmd
+  for _nvm_cmd in nvm node npm npx pnpm yarn; do
+    eval "$_nvm_cmd() { _load_nvm; \"$_nvm_cmd\" \"\$@\"; }"
+  done
+  unset _nvm_cmd
 fi
 
 if command -v pyenv >/dev/null 2>&1; then
-pyenv() {
-  unset -f pyenv
-  eval "$(command pyenv init -)"
-  pyenv "$@"
-}
+  pyenv() {
+    unset -f pyenv
+    eval "$(command pyenv init -)"
+    pyenv "$@"
+  }
 
 fi
 [[ -f ~/.scripts/auto_venv.sh ]] && source ~/.scripts/auto_venv.sh
@@ -252,3 +251,11 @@ fi
 export BAT_THEME=ansi
 export LS_COLORS="di=34:ln=36:ex=32:*.tar=31:*.gz=31:*.zip=31"
 export EZA_COLORS="$LS_COLORS"
+
+# Use the active Java installation unless JAVA_HOME was already configured.
+if [[ -z ${JAVA_HOME:-} ]] && command -v java >/dev/null 2>&1; then
+  _java_path=$(readlink -f "$(command -v java)")
+  [[ $_java_path == */bin/java ]] && JAVA_HOME=${_java_path%/bin/java}
+  unset _java_path
+fi
+[[ -n ${JAVA_HOME:-} ]] && export JAVA_HOME
