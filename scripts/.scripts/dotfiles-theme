@@ -73,7 +73,7 @@ def tmux_style(p):
         f'set -g pane-border-style "fg={p["muted"]}"',
         f'set -g pane-active-border-style "fg={p["cyan"]}"',
         f'set -g message-style "bg=default,fg={p["cyan"]},bold"',
-        f'set -g mode-style "bg={p["selection"]},fg={p["fg"]},bold"',
+        f'set -g mode-style "bg={p["cyan"]},fg={p["bg"]},bold"',
         f'set -g popup-style "bg=default,fg={p["fg"]}"',
         f'set -g popup-border-style "fg={p["cyan"]}"',
         f'set -g @runcat-color "{p["cyan"]}"', ''])
