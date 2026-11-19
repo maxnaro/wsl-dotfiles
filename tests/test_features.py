@@ -40,3 +40,30 @@ class Features(unittest.TestCase):
 
     def test_empty_project_list_does_not_connect(self):
         self.assertEqual(self.workspace(entries=''), (0, None))
+
+    def test_workspace_style_is_independent_of_tmux_startup_environment(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            bindir = home / '.local/bin'
+            bindir.mkdir(parents=True)
+            for tool in ('sesh', 'zoxide', 'tmux'):
+                stub = bindir / tool
+                stub.write_text('#!/bin/sh\nexit 0\n')
+                stub.chmod(0o755)
+            stub = bindir / 'fzf'
+            stub.write_text(
+                '#!/bin/sh\ncat >/dev/null\n'
+                'printf "%s\\n" "$FZF_DEFAULT_OPTS" "$FZF_DEFAULT_OPTS_FILE" "$@" > "$HOME/options"\n'
+            )
+            stub.chmod(0o755)
+            snapshots = []
+            for inherited in ('', '--height=20% --layout=default --border=none'):
+                env = dict(os.environ, HOME=tmp, PATH='/usr/bin:/bin',
+                           FZF_DEFAULT_OPTS=inherited, FZF_DEFAULT_OPTS_FILE='/stale/options')
+                subprocess.run(['bash', str(ROOT / 'tmux/.config/tmux/scripts/workspace.sh')],
+                               env=env, check=True, capture_output=True)
+                snapshots.append((home / 'options').read_text().splitlines())
+            self.assertEqual(snapshots[0], snapshots[1])
+            self.assertEqual(snapshots[0][:2], ['', ''])
+            for option in ('--style=full', '--layout=reverse', '--border=rounded', '--height=100%'):
+                self.assertIn(option, snapshots[0])

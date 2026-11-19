@@ -16,6 +16,9 @@ end
 fish_add_path --path ~/.local/bin
 fish_add_path --path (test -n "$GOPATH"; and echo "$GOPATH/bin"; or echo "$HOME/go/bin")
 
+set -l vscode "/mnt/c/Users/MaxNarongchai/AppData/Local/Programs/Microsoft VS Code/bin"
+test -d $vscode; and fish_add_path --path --append $vscode
+
 # Pyenv
 if test -d "$HOME/.pyenv/bin"
     fish_add_path --path "$HOME/.pyenv/shims" "$HOME/.pyenv/bin"
@@ -25,6 +28,15 @@ if test -r "$HOME/.config/fish/local.fish"
     source "$HOME/.config/fish/local.fish"
 end
 status is-interactive; or return
+
+# Native vi editing starts in Insert mode for each command.
+set -g fish_cursor_default block
+set -g fish_cursor_insert line
+set -g fish_cursor_visual block
+set -g fish_cursor_replace underscore
+set -g fish_cursor_replace_one underscore
+set -g fish_cursor_external block
+fish_vi_key_bindings
 
 # Enter the existing tmux server, or start one and restore its saved layout.
 if test "$DOTFILES_NO_TMUX" != 1; and test -z "$TMUX"; and isatty stdin; and isatty stdout; and type -q tmux
@@ -118,3 +130,6 @@ set -g fish_color_operator magenta
 set -g fish_color_comment brblack
 set -g fish_color_autosuggestion brblack
 set -g fish_color_search_match --background=cyan black
+
+# Atuin retains Insert-mode history search; Normal mode keeps Vim redo.
+bind -M default ctrl-r redo
