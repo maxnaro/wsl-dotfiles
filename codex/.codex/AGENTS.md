@@ -11,3 +11,5 @@ Give each subagent a bounded task, coordinate shared files, and review its resul
 # Commits
 
 Commit changes with conventional commits, with logical separation, including any uncommitted changes prior to your own
+
+Do not include `Co-authored-by` trailers or any other attribution that identifies the agent as a collaborator in commit messages.
