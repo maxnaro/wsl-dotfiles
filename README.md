@@ -134,6 +134,19 @@ Start a fresh Codex session inside and outside this repository and ask it to
 summarize its loaded delegation instructions. Both should report the standing
 request. Other devices inherit the preference after installing these dotfiles.
 
+### Claude Code usage limits and handoffs
+
+`./setup.sh` installs Jin Bai's [My Time Has Come](https://github.com/JinBa1/my-time-has-come)
+and activates it for Claude Code when the CLI is available and uses the default
+`~/.claude` directory. Start a fresh Claude Code session after activation.
+At 85% of the five-hour window, mthc asks Claude to wrap up. At 95%, it blocks
+further tool calls and writes a handoff under `.mthc/` in the working directory.
+Your local thresholds and usage state live in `~/.config/mthc/`.
+
+Run `mthc doctor` to check the integration and `mthc uninstall` to remove the
+hooks and restore the prior statusline. If you install Claude Code later, rerun
+setup to activate mthc. Keep `~/.local/bin` on the PATH Claude Code inherits.
+
 ### Tmux startup and recovery
 
 Interactive Bash and Fish terminals automatically attach to an existing tmux

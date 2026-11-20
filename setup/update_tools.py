@@ -26,6 +26,7 @@ UPSTREAM = {
     'sesh': ('joshmedeski/sesh', 'v', 'sesh_Linux_x86_64.tar.gz', 'sesh_Linux_arm64.tar.gz'),
     'atuin': ('atuinsh/atuin', 'v', 'atuin-x86_64-unknown-linux-musl.tar.gz', 'atuin-aarch64-unknown-linux-musl.tar.gz'),
     'tmux': ('tmux/tmux', '', 'tmux-{version}.tar.gz', 'tmux-{version}.tar.gz'),
+    'mthc': ('JinBa1/my-time-has-come', 'v', 'mthc_{version}_linux_amd64.tar.gz', 'mthc_{version}_linux_arm64.tar.gz'),
 }
 REGISTRY = {tool: {'repo': spec[0]} for tool, spec in UPSTREAM.items()}
 ARCHES = ('x86_64', 'aarch64')
