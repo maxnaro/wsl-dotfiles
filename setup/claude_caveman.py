@@ -1,15 +1,15 @@
-"""Register a Claude Code SessionStart hook that enforces `/caveman ultra`."""
+"""Register a Claude Code SessionStart hook that enforces `/caveman ultra`
+and a status line that shows when it is active."""
 import json
 import os
 from pathlib import Path
 import tempfile
 
-MESSAGE = (
-    'Ultracave mode is mandatory for this session. Apply `/caveman ultra` from '
-    'the first reply, including progress updates, and keep it active until the '
-    'user says "stop caveman" or "normal mode".'
-)
-COMMAND = f"echo '{MESSAGE}'"
+HERE = Path(__file__).resolve().parent
+COMMAND = f"python3 '{HERE / 'claude_caveman_hook.py'}'"
+STATUSLINE = f"'{HERE / 'claude_statusline.sh'}'"
+LEGACY_STATUSLINE = 'input=$(cat); cwd=$(echo "$input" | jq -r'
+LEGACY_HOOK = "echo 'Ultracave mode is mandatory"
 MATCHER = 'startup|resume|clear|compact'
 
 
@@ -28,12 +28,27 @@ def configure(path):
     entries = hooks.setdefault('SessionStart', [])
     if not isinstance(entries, list):
         raise ValueError('expected hooks.SessionStart to be a list')
-    for entry in entries:
-        if isinstance(entry, dict) and any(
-            isinstance(h, dict) and h.get('command') == COMMAND for h in entry.get('hooks', [])
-        ):
-            return
-    entries.append({'matcher': MATCHER, 'hooks': [{'type': 'command', 'command': COMMAND}]})
+    entries[:] = [
+        e for e in entries
+        if not (isinstance(e, dict) and any(
+            isinstance(h, dict) and str(h.get('command', '')).startswith(LEGACY_HOOK)
+            for h in e.get('hooks', [])
+        ))
+    ]
+    if not any(
+        isinstance(e, dict) and any(
+            isinstance(h, dict) and h.get('command') == COMMAND for h in e.get('hooks', [])
+        ) for e in entries
+    ):
+        entries.append({'matcher': MATCHER, 'hooks': [{'type': 'command', 'command': COMMAND}]})
+
+    status = settings.get('statusLine')
+    if not isinstance(status, dict) or str(status.get('command', '')).startswith(
+        (LEGACY_STATUSLINE, STATUSLINE)
+    ) or not status:
+        settings['statusLine'] = {
+            'type': 'command', 'command': STATUSLINE, 'padding': 0, 'refreshInterval': 10,
+        }
 
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(dir=path.parent)
