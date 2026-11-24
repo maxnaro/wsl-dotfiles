@@ -128,7 +128,7 @@ backup and rerun behavior. Setup also adds a `SessionStart` hook to Claude's
 every start, resume, clear, and compact, plus a `UserPromptSubmit` hook that
 repeats a short reminder each turn. Saying "normal mode" or "stop caveman"
 turns both off for that session until the next start or clear. A status line
-shows `[CAVEMAN ULTRA]` while active. A custom status line is left untouched. Existing
+shows the working directory and git branch. A custom status line is left untouched. Existing
 Claude settings and permissions stay local.
 Both tools share one policy source. `stow codex` installs only the Codex link;
 use setup to install both integrations.
