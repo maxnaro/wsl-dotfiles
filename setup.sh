@@ -164,6 +164,7 @@ link_file "$DOTFILES_DIR/codex/.codex/AGENTS.md" "${CODEX_HOME:-$HOME/.codex}/AG
 # Share the delegation policy with Claude Code
 link_file "$DOTFILES_DIR/codex/.codex/AGENTS.md" "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/CLAUDE.md"
 python3 "$DOTFILES_DIR/setup/claude_attribution.py"
+python3 "$DOTFILES_DIR/setup/claude_caveman.py"
 python3 "$DOTFILES_DIR/setup/claude_mthc.py"
 
 # Link git configuration if present
