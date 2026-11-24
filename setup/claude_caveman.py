@@ -25,22 +25,26 @@ def configure(path):
     hooks = settings.setdefault('hooks', {})
     if not isinstance(hooks, dict):
         raise ValueError('expected hooks to be an object')
-    entries = hooks.setdefault('SessionStart', [])
-    if not isinstance(entries, list):
-        raise ValueError('expected hooks.SessionStart to be a list')
-    entries[:] = [
-        e for e in entries
-        if not (isinstance(e, dict) and any(
-            isinstance(h, dict) and str(h.get('command', '')).startswith(LEGACY_HOOK)
-            for h in e.get('hooks', [])
-        ))
-    ]
-    if not any(
-        isinstance(e, dict) and any(
-            isinstance(h, dict) and h.get('command') == COMMAND for h in e.get('hooks', [])
-        ) for e in entries
-    ):
-        entries.append({'matcher': MATCHER, 'hooks': [{'type': 'command', 'command': COMMAND}]})
+    for event, matcher in (('SessionStart', MATCHER), ('UserPromptSubmit', None)):
+        entries = hooks.setdefault(event, [])
+        if not isinstance(entries, list):
+            raise ValueError(f'expected hooks.{event} to be a list')
+        entries[:] = [
+            e for e in entries
+            if not (isinstance(e, dict) and any(
+                isinstance(h, dict) and str(h.get('command', '')).startswith(LEGACY_HOOK)
+                for h in e.get('hooks', [])
+            ))
+        ]
+        if not any(
+            isinstance(e, dict) and any(
+                isinstance(h, dict) and h.get('command') == COMMAND for h in e.get('hooks', [])
+            ) for e in entries
+        ):
+            entry = {'hooks': [{'type': 'command', 'command': COMMAND}]}
+            if matcher:
+                entry = {'matcher': matcher, **entry}
+            entries.append(entry)
 
     status = settings.get('statusLine')
     if not isinstance(status, dict) or str(status.get('command', '')).startswith(

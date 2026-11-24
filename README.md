@@ -124,9 +124,11 @@ Only the instruction file is managed; Codex runtime state stays local.
 Setup also links the same policy to
 `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/CLAUDE.md` for Claude Code, with the same
 backup and rerun behavior. Setup also adds a `SessionStart` hook to Claude's
-`settings.json` that reinjects the `/caveman ultra` rules as session context on
-every start, resume, clear, and compact, and installs a status line that shows
-`[CAVEMAN ULTRA]` while active. A custom status line is left untouched. Existing
+`settings.json` that injects explicit caveman ultra rules as session context on
+every start, resume, clear, and compact, plus a `UserPromptSubmit` hook that
+repeats a short reminder each turn. Saying "normal mode" or "stop caveman"
+turns both off for that session until the next start or clear. A status line
+shows `[CAVEMAN ULTRA]` while active. A custom status line is left untouched. Existing
 Claude settings and permissions stay local.
 Both tools share one policy source. `stow codex` installs only the Codex link;
 use setup to install both integrations.
