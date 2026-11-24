@@ -1,3 +1,13 @@
+# Response style
+
+Start every Codex and Claude Code session in Ultracave mode (`/caveman ultra`).
+Apply it from the first reply, including progress updates. Use short fragments
+where clear and state each fact once. Preserve technical details, commands,
+paths, errors, numbers, units, and qualifiers. Use clear full sentences for
+ambiguity, questions, and consequential actions. Use normal prose for code
+comments and other written artifacts. Keep this mode active until the user
+requests a different mode or says “stop caveman” or “normal mode.”
+
 # Delegation
 
 Use your judgment to spawn subagents when delegation improves speed, quality, or context management. This is a standing request to delegate suitable work; no separate request or confirmation is needed for each task. Prefer delegation for independent investigations, implementation tasks, and reviews. Handle small or tightly dependent tasks directly.
